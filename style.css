@@ -1,0 +1,30 @@
+/*
+	RESET
+*/
+* { margin: 10; padding: 10; }
+body { font: 14px/1.1 Verdana, Sans-Serif; background: #EEEEEE;}
+.clear { clear: both; }
+img, a img { border: none; }
+input { outline: none; }
+table { border-collapse: collapse; } 
+td { border: 1px solid black; height: 150px; width: 150px; }
+
+/*
+	STRUCTURE
+*/
+.wrapper { display: flex; flex-wrap: wrap; flex-direction: column; }
+.section { display: flex; }
+.item-m { display: flex; }
+#menu-bar { background-color: #0000FF; padding: 0; margin: 0; }
+#main-view { background-color: #FFFFFF; flex: 7; }
+#detail-view { background-color: #FF0000; flex: 3; min-width: 400px; }
+
+/*
+	TYPOGRAPHY
+*/
+h1 { font: bold 29px/1.1 Verdana, Sans-Serif; text-align: left; color: #EEEEEE; }
+h2 { font: bold 20px/1.1 Verdana, Sans-Serif; color: #EEEEEE; }
+
+.input-field { background-color: #CCCCCC; color: #000000; border: 1px solid #EEEEEE; border-radius: 0px; padding: 5px 10px 5px 10px; margin: 10px 10px 5px 10px; }
+button { font: 20px/1.1 Verdana, Sans-Serif; background-color: #EEEEEE; border: 0px; height: 50px; }
+.hide-element { width: 0.1px; height: 0.1px; opacity: 0; overflow: hidden; position: absolute; z-index: -1; }
