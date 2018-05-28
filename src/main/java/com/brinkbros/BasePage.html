@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <wicket:head>
+        <title>CalendarManager</title>
+        <wicket:link>
+            <link rel="stylesheet" type="text/css" href="style.css"/>
+        </wicket:link>
+    </wicket:head>
+    <body>
+        <div id="myDiv">
+            <form wicket:id="buttons" id="buttons" class="inputForm">
+                <span wicket:id="buttonRow" id="buttonRow">
+                    <input type="submit" wicket:id="button" id="button" />
+                </span>
+            </form>
+        </div>
+        <div id="calendarPanel">
+            <span wicket:id="mycal"/>
+        </div>
+
+        <div id="feedbackPanel">
+            <span wicket:id="feedback"/>
+        </div>       
+
+    </body>
+</html>

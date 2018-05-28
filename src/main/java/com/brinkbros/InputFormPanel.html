@@ -1,0 +1,25 @@
+<wicket:panel>
+    <form wicket:id="inputForm" class="inputForm">
+        <table id="inputFormTable">
+            <tr>
+                <td>
+                    <label for="textField1"><wicket:message key="textField1" /></label>
+                    <input wicket:id="textField1" id="textField1" type="text" size="40">
+                </td>
+                <td>
+                    <span wicket:id="radioGroup1">
+                        <label><wicket:message key="radioGroup1" /></label>
+                        <span wicket:id="numbers">
+                            <input type="radio" wicket:id="radio"/>
+                            <label wicket:id="number"></label>
+                        </span>
+                    </span>
+                </td>
+                <td>
+                    <input type="submit" wicket:id="saveButton" value="I'm a button" />
+                    <input type="submit" wicket:id="resetButton" value="I'm a reset button" />
+                </td>
+            </tr>
+        </table>
+    </form>
+</wicket:panel>
