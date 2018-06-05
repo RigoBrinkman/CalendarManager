@@ -34,12 +34,12 @@ public class DateEvent implements Serializable {
         this.color = color;
     }
 
-    public EventColor getColor() {
-        return color;
+    public Calendar getCalendar() {
+        return calendar;
     }
 
-    public int getDay() {
-        return calendar.get(DAY_OF_MONTH);
+    public EventColor getColor() {
+        return color;
     }
 
     public String getName() {

@@ -5,10 +5,16 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import static java.util.Calendar.DAY_OF_MONTH;
 import static java.util.Calendar.DAY_OF_WEEK;
+import static java.util.Calendar.DAY_OF_WEEK_IN_MONTH;
+import static java.util.Calendar.DAY_OF_YEAR;
+import static java.util.Calendar.MONDAY;
 import static java.util.Calendar.MONTH;
+import static java.util.Calendar.SUNDAY;
 import static java.util.Calendar.WEEK_OF_MONTH;
+import static java.util.Calendar.WEEK_OF_YEAR;
 import static java.util.Calendar.YEAR;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
 
 public class OverviewDate implements Serializable {
@@ -20,13 +26,19 @@ public class OverviewDate implements Serializable {
 
     private OverviewDate(Calendar calendar, boolean currentMonth) {
         this.curentMonth = currentMonth;
-        this.calendar = new GregorianCalendar(
-                calendar.get(YEAR),
-                calendar.get(MONTH),
-                calendar.get(DAY_OF_MONTH));
+        this.calendar = (Calendar) calendar.clone();
         events = new ArrayList();
         isToday = false;
 
+    }
+
+    public static void main(String[] args) {
+        Calendar cal1 = new GregorianCalendar(2018, 5, 1);
+        System.out.println(cal1.get(DAY_OF_MONTH) + "/" + cal1.get(MONTH) + "/" + cal1.get(YEAR) + " " + cal1.getMaximum(WEEK_OF_MONTH));
+        cal1.set(MONTH, 4);
+        System.out.println(cal1.get(DAY_OF_MONTH) + "/" + cal1.get(MONTH) + "/" + cal1.get(YEAR) + " " + cal1.getMaximum(WEEK_OF_MONTH));
+        cal1.set(MONTH, 5);
+        System.out.println(cal1.get(DAY_OF_MONTH) + "/" + cal1.get(MONTH) + "/" + cal1.get(YEAR) + " " + cal1.getMaximum(WEEK_OF_MONTH));
     }
 
     private void addEvent(DateEvent de) {
@@ -51,12 +63,34 @@ public class OverviewDate implements Serializable {
         return sb.toString();
     }
 
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash += calendar.get(YEAR);
+        hash *= 7;
+        hash += calendar.get(DAY_OF_YEAR);
+        return hash;
+    }
+
+    public Calendar getCalendar() {
+        return calendar;
+    }
+
     public int getDay() {
         return calendar.get(DAY_OF_MONTH);
     }
 
     public List<DateEvent> getEvents() {
         return events;
+    }
+
+    public String getKey() {
+        StringBuilder sb = new StringBuilder();
+        sb
+                .append(calendar.get(DAY_OF_MONTH))
+                .append('/')
+                .append(calendar.get(MONTH) + 1);
+        return sb.toString();
     }
 
     private int getWeekOfYear() {
@@ -67,101 +101,133 @@ public class OverviewDate implements Serializable {
         isToday = today;
     }
 
-    public static WeekList getWeekList(int year, int month) {
-        WeekList weeks = WeekList.getInstance(year, month);
+    public static ODMonth getWeekList(int year, int month) {
+        ODMonth odMonth = ODMonth.getInstance(year, month);
 
         DatabaseDummy.getEvents(
-                year, month)
+                odMonth.getFirstDay(), odMonth.getLastDay())
                 .stream()
-                .forEach((DateEvent x)
-                        -> weeks
-                        .getOverviewDate(x.getDay())
-                        .addEvent(x));
+                .forEach((DateEvent x) -> {
+                    if (odMonth.hasOverViewDate(x.getCalendar())) {
+                        odMonth.getOverviewDate(x.getCalendar());
+                    }
+                });
 
-        return weeks;
+        return odMonth;
     }
 
-    public static WeekList getPreviousWeekList(int year, int month) {
+    public static ODMonth getPreviousWeekList(int year, int month) {
         if (month == 0) {
             return getWeekList(year - 1, 11);
-        }else{
+        } else {
             return getWeekList(year, month - 1);
         }
     }
 
-    public static WeekList getNextWeekList(int year, int month) {
-        if(month == 12){
+    public static ODMonth getNextWeekList(int year, int month) {
+        if (month == 12) {
             return getWeekList(year + 1, 0);
-        }else{
+        } else {
             return getWeekList(year, month + 1);
         }
     }
 
-    public static class WeekList extends ArrayList<DayList> {
+    public static class ODMonth extends ArrayList<ODWeek> {
 
-        private Calendar weekListCal;
+        private Calendar monthCal;
+        private Calendar thisMonth;
         private Calendar today;
         private int year;
         private int month;
+        private Calendar firstDay;
+        private Calendar lastDay;
+        private HashMap<Integer, OverviewDate> dates;
 
-        private WeekList(int year, int month) {
+        private ODMonth(int year, int month) {
             super();
-            weekListCal = new GregorianCalendar(year, month, 1);
+            monthCal = new GregorianCalendar(year, month, 1);
+            monthCal.set(DAY_OF_WEEK, SUNDAY);
+            monthCal.set(DAY_OF_WEEK_IN_MONTH, 1);
+            monthCal.setFirstDayOfWeek(MONDAY);
+            thisMonth = (Calendar) monthCal.clone();
+            monthCal.roll(DAY_OF_WEEK, true);
             today = Calendar.getInstance();
             this.year = year;
             this.month = month;
+            this.dates = new HashMap();
 
-            for (int i = weekListCal.getActualMinimum(WEEK_OF_MONTH) + 1; i <= weekListCal.getActualMaximum(WEEK_OF_MONTH); i++) {
-                add(new DayList(i, month));
+            do {
+                add(new ODWeek(monthCal));
+            } while (thisMonth.get(MONTH) == monthCal.get(MONTH));
+
+            for (ODWeek week : this) {
+                for (OverviewDate day : week) {
+                    dates.put(day.getCalendar().get(DAY_OF_YEAR), day);
+                }
             }
-            if (today.get(MONTH) == month) {
-                //getOverviewDate(today.get(DAY_OF_MONTH)).setToday(true);
-            }
+
+            this.firstDay = get(0).get(0).getCalendar();
+            this.lastDay = get(size() - 1).get(6).getCalendar();
 
         }
 
-        private OverviewDate getOverviewDate(int day) {
-            weekListCal.set(DAY_OF_MONTH, day);
-            return get(weekListCal.get(WEEK_OF_MONTH) - 1)
-                    .get(weekListCal.get(DAY_OF_WEEK) - 2);
+        private boolean hasOverViewDate(Calendar calendar) {
+            return dates.containsKey(calendar.get(DAY_OF_YEAR));
         }
-        
-        public int getMonth(){
+
+        private OverviewDate getOverviewDate(Calendar calendar) {
+            return dates.get(calendar.get(DAY_OF_YEAR));
+        }
+
+        public Calendar getFirstDay() {
+            return firstDay;
+        }
+
+        public Calendar getLastDay() {
+            return lastDay;
+        }
+
+        public int getMonth() {
             return month;
         }
-        
-        public int getYear(){
+
+        public int getYear() {
             return year;
         }
 
-        private static WeekList getInstance(int year, int month) {
-            return new WeekList(year, month);
+        private static ODMonth getInstance(int year, int month) {
+            return new ODMonth(year, month);
         }
     }
 
-    public static class DayList extends ArrayList<OverviewDate> {
+    public static class ODWeek extends ArrayList<OverviewDate> {
 
         private int weekOfMonth;
+        private Calendar firstDay;
+        private Calendar lastDay;
 
-        private DayList(int weekOfMonth, int month) {
+        private ODWeek(Calendar cal) {
             super();
-            this.weekOfMonth = weekOfMonth;
-            Calendar cal = Calendar.getInstance();
-            cal.set(MONTH, month);
-            cal.set(WEEK_OF_MONTH, weekOfMonth);
+
+            firstDay = (Calendar) cal.clone();
 
             for (int i = 0; i < 7; i++) {
                 add(new OverviewDate(cal, true));
                 cal.roll(DAY_OF_WEEK, true);
             }
+
+            lastDay = (Calendar) cal.clone();
+            cal.roll(WEEK_OF_YEAR, true);
         }
 
         @Override
         public OverviewDate get(int i) {
-            if (i < 7) {
-                return super.get(i);
-            } else {
+            if (i < 0) {
+                return super.get(i + 7);
+            } else if (i >= 7) {
                 return super.get(i - 7);
+            } else {
+                return super.get(i);
             }
         }
 

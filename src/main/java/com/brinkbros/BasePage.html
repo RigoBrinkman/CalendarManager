@@ -7,6 +7,35 @@
         </wicket:link>
     </wicket:head>
     <body>
+        <div class="wrapper" id="page-wrap">
+            <div class="section" id="menu-bar">
+                <wicket:link>
+			<a href="./BasePage.html"><button type="button" class="active-page">Overzicht</button></a>
+			<a href="./EventsPage.html"><button type="button">Evenementen</button></a>
+			<a href="./DossierPage.html"><button type="button">Dossiers</button></a>
+			<a href="./PeoplePage.html"><button type="button">Mensen</button></a>
+			<a href="./DeadlinePage.html"><button type="button">Deadlines</button></a>
+			<a href="./UserPage.html"><button type="button">Gebruikers</button></a>
+			<a href="./SettingsPage.html"><button type="button">Voorkeuren</button></a>                
+                </wicket:link>
+            </div>
+            <div class="section" id="main">
+                <div class="item-m" id="main-view">
+                    <div id="calendarPanel">
+                        <span wicket:id="mycal"/>
+                    </div>
+                </div>
+                <div class="item-m" id="detail-view">
+                    <div class="details">
+                        <h1>Details</h1><br>
+                        <p class="aleft"> Selecteer Evenement om details weer te geven.</p>
+                        <div id="feedbackPanel">
+                            <span wicket:id="feedback"/>
+                        </div>      
+                    </div>
+                </div>
+            </div>
+        </div>
         <div id="myDiv">
             <form wicket:id="buttons" id="buttons" class="inputForm">
                 <span wicket:id="buttonRow" id="buttonRow">
@@ -14,13 +43,9 @@
                 </span>
             </form>
         </div>
-        <div id="calendarPanel">
-            <span wicket:id="mycal"/>
-        </div>
 
-        <div id="feedbackPanel">
-            <span wicket:id="feedback"/>
-        </div>       
+
+ 
 
     </body>
 </html>

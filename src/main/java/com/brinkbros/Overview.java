@@ -1,12 +1,11 @@
 package com.brinkbros;
 
-import com.brinkbros.OverviewDate.DayList;
-import com.brinkbros.OverviewDate.WeekList;
+import com.brinkbros.OverviewDate.ODWeek;
+import com.brinkbros.OverviewDate.ODMonth;
+import static java.util.Calendar.DAY_OF_MONTH;
 import java.util.List;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Button;
-import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.markup.repeater.data.DataView;
@@ -15,18 +14,17 @@ import org.apache.wicket.model.Model;
 
 public class Overview extends Panel {
 
-    private WeekList weekList;
+    private ODMonth weekList;
 
     public Overview(String id) {
         super(id);
 
-        add(new CalendarTable("tableRow", OverviewDate.getWeekList(2018, 4)));
-//        add(new ButtonForm("buttons"));
+        add(new CalendarTable("tableRow", OverviewDate.getWeekList(2018, 5)));
     }
 
-    private class CalendarTable extends DataView<DayList> {
+    private class CalendarTable extends DataView<ODWeek> {
 
-        private CalendarTable(String id, WeekList weekList) {
+        private CalendarTable(String id, ODMonth weekList) {
             super(id, new ListDataProvider(weekList));
 
             Overview.this.weekList = weekList;
@@ -34,9 +32,9 @@ public class Overview extends Panel {
         }
 
         @Override
-        protected void populateItem(Item<DayList> item) {
+        protected void populateItem(Item<ODWeek> item) {
 
-            DayList dayList = item.getModelObject();
+            ODWeek dayList = item.getModelObject();
 
             item.add(new DataView<OverviewDate>("cells",
                     new ListDataProvider(dayList)) {
@@ -44,7 +42,7 @@ public class Overview extends Panel {
                         @Override
                         protected void populateItem(Item<OverviewDate> item) {
                             OverviewDate overviewDate = item.getModelObject();
-                            item.add(new Label("dayNumber", Integer.toString(overviewDate.getDay())));
+                            item.add(new Label("dayNumber", Integer.toString(overviewDate.getCalendar().get(DAY_OF_MONTH))));
                             List<DateEvent> events = overviewDate.getEvents();
                             item.add(new DataView<DateEvent>("events", new ListDataProvider(events)) {
 
@@ -61,39 +59,4 @@ public class Overview extends Panel {
             );
         }
     }
-
-//    private class ButtonForm extends Form {
-//
-//        public ButtonForm(String id) {
-//            super(id);
-//            add(new Button("previous", new Model("vorige maand")) {
-//                @Override
-//                public void onSubmit() {
-//                    Overview.this.remove("tableRow");
-//                    Overview.this
-//                            .add(new CalendarTable(
-//                                            "tableRow",
-//                                            OverviewDate
-//                                            .getPreviousWeekList(
-//                                                    Overview.this.weekList.getYear(),
-//                                                    Overview.this.weekList.getMonth())));
-//                }
-//            });
-//            add(new Button("next", new Model("volgende maand")) {
-//                @Override
-//                public void onSubmit() {
-//                    Overview.this.remove("tableRow");
-//                    Overview.this
-//                            .add(new CalendarTable(
-//                                            "tableRow",
-//                                            OverviewDate
-//                                            .getNextWeekList(
-//                                                    Overview.this.weekList.getYear(),
-//                                                    Overview.this.weekList.getMonth())));
-//                }
-//            });
-//        }
-//
-//    }
-
 }
