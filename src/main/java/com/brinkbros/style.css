@@ -6,7 +6,7 @@ body { font: 14px/1.1 Verdana, Sans-Serif; background: #EEEEEE;}
 .clear { clear: both; }
 img, a img { border: none; flex-shrink: 1; }
 input { outline: none; }
-input[type:"radio"]{ margin: 10px; padding: 10px; }
+input[type="radio"]{ margin: 10px; padding: 10px; }
 table { border-collapse: collapse; width: 98%; margin: 1%; } 
 th { padding: 10px 0 10px 0; }
 td { border: 1px solid black; height: 120px; width: 150px;  text-align: left; vertical-align: top; padding: 10px; min-width: 100px; }

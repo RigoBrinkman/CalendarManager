@@ -1,91 +1,179 @@
 package com.brinkbros;
 
-import java.util.ArrayList;
+import com.brinkbros.Events.Events;
+import com.brinkbros.Overview.Overview;
+import com.brinkbros.addEvent.AddEvent;
+import java.util.Arrays;
+import java.util.List;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.markup.html.WebPage;
-import org.apache.wicket.markup.html.form.Button;
-import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.FeedbackPanel;
-import org.apache.wicket.model.Model;
+import org.apache.wicket.markup.html.panel.Panel;
 
 public class BasePage extends WebPage {
 
     private static final long serialVersionUID = 1L;
 
+    private static final String PANEL_ID = "mycal";
+    private static final String SIDE_PANEL_ID = "sidePanel";
+    private static final String BUTTON_LIST_ID = "buttonList";
+    private static final String BUTTON_CONTAINER_ID = "buttonContainer";
+    private static final String BUTTON_ID = "buttonOption";
+
+    private static final PageType START_PAGE = PageType.OVERVIEW;
+    
+    private SidePanel sidePanel;
+    private Panel mainPanel;
+
+    private ListView<PageType> options;
+    private AjaxLink clickedButton;
+
     public BasePage(final PageParameters parameters) {
         super(parameters);
+        sidePanel = new SidePanel(SIDE_PANEL_ID);
+        sidePanel.setOutputMarkupId(true);
+        sidePanel.setOutputMarkupPlaceholderTag(true);
+        add(sidePanel);
+        
+        mainPanel = PageType.OVERVIEW.getPanel(sidePanel);
+        add(mainPanel);
 
-        add(new ButtonForm("buttons"));
-        add(new Overview("mycal"));
-        add(new FeedbackPanel("feedback"));
+        WebMarkupContainer container = new WebMarkupContainer(BUTTON_CONTAINER_ID);
 
-    }
+        List<PageType> buttonList = Arrays.asList(PageType.values());
 
-    private class ButtonForm extends Form {
+        options = new ListView<PageType>(BUTTON_LIST_ID, buttonList) {
+            @Override
+            protected void populateItem(ListItem<PageType> item) {
+                PageType buttonType = item.getModelObject();
+                AjaxLink button = new AjaxLink(BUTTON_ID) {
+                    @Override
+                    public void onClick(AjaxRequestTarget target) {
+                        Panel newPanel = buttonType.getPanel(sidePanel);
+                        mainPanel.replaceWith(newPanel);
+                        target.add(newPanel);
+                        mainPanel = newPanel;
+                        sidePanel.setVisible(buttonType.isSidePanelVisible());
+                        target.add(sidePanel);
+                        
+                        clickedButton.setEnabled(true);
+                        target.add(clickedButton);
+                        clickedButton = this;
+                        clickedButton.setEnabled(false);
+                        target.add(clickedButton);
 
-        private ButtonForm(String name) {
-            super(name);
-            //to be replaced by a method that checks what buttons a user is allowed to see
-            ArrayList<PageType> buttonList = new ArrayList();
-//            buttonList.add(PageType.INPUTFORM);
-            buttonList.add(PageType.OVERVIEW);
-
-            ListView<PageType> options = new ListView<PageType>("buttonRow", buttonList) {
-                @Override
-                protected void populateItem(ListItem<PageType> item) {
-                    Button button;
-                    switch (item.getModelObject()) {
-                        case INPUTFORM:
-                            button = new Button("button", new Model(item.getModelObject().getName())) {
-                                @Override
-                                public void onSubmit() {
-                                    BasePage.this.remove("mycal");
-                                    BasePage.this.add(new InputFormPanel("mycal"));
-                                }
-                            };
-                            break;
-
-                        case OVERVIEW:
-                            button = new Button("button", new Model(item.getModelObject().getName())) {
-                                @Override
-                                public void onSubmit() {
-                                    BasePage.this.remove("mycal");
-                                    BasePage.this.add(new Overview("mycal"));
-                                }
-                            };
-                            break;
-
-                        default:
-                            throw new IllegalArgumentException("Unknown ButtonType!");
                     }
 
-                    button.setLabel(
-                            new Model(item.getModelObject().getName()));
-                    item.add(button);
+                    @Override
+                    public void renderHead(IHeaderResponse response) {
+                        response.render(OnDomReadyHeaderItem.forScript(buttonType.getValueJavascript(getMarkupId())));
+                        super.renderHead(response);
+                    }
 
+                };
+                if(buttonType == START_PAGE){
+                    clickedButton = button;
+                    clickedButton.setEnabled(false);
                 }
-            };
-            add(options);
+                button.setOutputMarkupId(true);
 
-        }
+                item.add(button);
+            }
+        };
+        container.add(options);
+        add(container);
 
     }
 
-    private enum PageType {
+    protected void setButtonEnabled(PageType buttonType, boolean isButtonEnabled) {
+    }
+    
 
-        INPUTFORM("InputForm"),
-        OVERVIEW("Overview");
+    public enum PageType {
+
+        OVERVIEW("Overzicht", "overviewButton", true) {
+                    @Override
+                    public Panel createPanel(String panelId, SidePanel sidePanel) {
+                        return new Overview(panelId) {
+                            @Override
+                            public SidePanel getSidePanel() {
+                                return sidePanel;
+                            }
+                        };
+                    }
+
+                },
+        EVENTS("Evenementen", "eventsButton", true) {
+                    @Override
+                    public Panel createPanel(String panelId, SidePanel sidePanel) {
+                        return new Events(panelId) {
+                            @Override
+                            public SidePanel getSidePanel() {
+                                return sidePanel;
+                            }
+                        };
+                    }
+                },
+        ADDEVENT("Nieuw evenement", "addEventButton", true){
+            @Override
+            protected Panel createPanel(String panelId, SidePanel sidePanel) {
+                return new AddEvent(panelId){
+                    @Override
+                    public SidePanel getSidePanel() {
+                        return sidePanel;
+                    }
+                    
+                };
+            }
+            
+        };
+        private final String id;
         private final String name;
+        private final boolean isSidePanelVisible;
 
-        private PageType(String name) {
+        protected abstract Panel createPanel(String panelId, SidePanel sidePanel);
+
+        private PageType(String name, String id, boolean isSidePanelVisible) {
             this.name = name;
+            this.id = id;
+            this.isSidePanelVisible = isSidePanelVisible;
         }
 
-        private String getName() {
+        public String getValueJavascript(String markupId) {
+            StringBuilder javascript = new StringBuilder();
+            javascript.append("document.getElementById(\"")
+                    .append(markupId)
+                    .append("\").value=\"")
+                    .append(getName())
+                    .append("\";");
+            return javascript.toString();
+        }
+
+        public Panel getPanel(SidePanel sidePanel) {
+            Panel panel = createPanel(PANEL_ID, sidePanel);
+            panel.setMarkupId(getId());
+            panel.setOutputMarkupId(true);
+            return panel;
+        }
+
+        public String getName() {
             return name;
         }
+
+        public String getId() {
+            return id;
+        }
+        
+        public boolean isSidePanelVisible() {
+            return isSidePanelVisible;
+        }
+
     }
 
 }

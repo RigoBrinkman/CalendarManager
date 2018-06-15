@@ -2,36 +2,19 @@ package com.brinkbros;
 
 import java.io.Serializable;
 import java.util.Calendar;
-import static java.util.Calendar.DAY_OF_MONTH;
 
 public class DateEvent implements Serializable {
 
-    private String name;
-    private Calendar calendar;
-    private EventColor color;
+    private final String name;
+    private final Calendar calendar;
+    private final EventColor color;
+    private final int id;
 
-    public enum EventColor {
-
-        BLUE("color: blue;"),
-        GREEN("color: green;"),
-        RED("color: red;"),
-        YELLOW("color: yellow;");
-
-        private String styleAttr;
-
-        private EventColor(String styleAttr) {
-            this.styleAttr = styleAttr;
-        }
-
-        public String getStyleAttr() {
-            return styleAttr;
-        }
-    }
-
-    public DateEvent(String name, Calendar calendar, EventColor color) {
+    protected DateEvent(String name, Calendar calendar, EventColor color, int id) {
         this.name = name;
         this.calendar = calendar;
         this.color = color;
+        this.id = id;
     }
 
     public Calendar getCalendar() {
@@ -40,6 +23,10 @@ public class DateEvent implements Serializable {
 
     public EventColor getColor() {
         return color;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public String getName() {
@@ -55,5 +42,23 @@ public class DateEvent implements Serializable {
                 .append(color)
                 .append(')');
         return sb.toString();
+    }
+
+    public enum EventColor {
+
+        BLUE("color: blue;"),
+        GREEN("color: green;"),
+        RED("color: red;"),
+        YELLOW("color: yellow;");
+
+        private final String styleAttr;
+
+        private EventColor(String styleAttr) {
+            this.styleAttr = styleAttr;
+        }
+
+        public String getStyleAttr() {
+            return styleAttr;
+        }
     }
 }
