@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+    <wicket:head>
+        <title>CalendarManager</title>
+        <wicket:link>
+            <link rel="stylesheet" type="text/css" href="style.css"/>
+        </wicket:link>
+    </wicket:head>
+    <body>
+        <div wicket:id="buttonContainer">
+            <span wicket:id="buttonList">
+                <input type="button" wicket:id="buttonOption"/>
+            </span>
+        </div>
+        <div class="wrapper" id="page-wrap">
+            <div class="section" id="menu-bar">
+            </div>
+            <div class="section" id="main">
+                <div class="item-m" id="main-view">
+                    <span wicket:id="mycal"/>
+                </div>
+                <div class="item-m" id="detail-view">
+                    <span wicket:id="sidePanel"/>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

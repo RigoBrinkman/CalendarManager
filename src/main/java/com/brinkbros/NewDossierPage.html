@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	
+	<title>Calendar Manager - Manage projects and resources</title>
+	
+	<link rel="stylesheet" href="style.css" type="text/css" />
+	<link rel="icon" href="globe.ico" type="image/x-icon" />
+</head>
+
+<body>
+	<div class="wrapper" id="page-wrap">
+		
+		<div class="section" id="menu-bar">
+			<a href="./BasePage.html"><button type="button">Overzicht</button></a>
+			<a href="./Events.html"><button type="button" class="active-page">Evenementen</button></a>
+			<a href="./DossierPage.html"><button type="button">Dossiers</button></a>
+			<a href="./PeoplePage.html"><button type="button">Mensen</button></a>
+			<a href="./DeadlinePage.html"><button type="button">Deadlines</button></a>
+			<a href="./UserPage.html"><button type="button">Gebruikers</button></a>
+			<a href="./SettingsPage.html"><button type="button">Voorkeuren</button></a>
+		</div>
+			
+		<div class="section" id="main">
+			<div class="item-m" id="main-view">
+				<div class="form-item">
+				<h2>Nieuw Dossier toevoegen</h2><br>
+				</div>
+				<div class="form-item">
+				<p>
+					<form id=>
+						<ul class="form-grid">
+							<li><input type="radio" name="categorie" value="evenement"> Nieuw Evenement	</li>
+							<li><input type="radio" name="categorie" value="dossier" checked> Nieuw Dossier </li>
+						</ul>
+						<br>
+						<br>
+						Titel:<br>
+						<input type="text" name="titel" class="input-box small-box"><br><br>
+						Datum:<br>
+						<input type="date" name="datum" min="2018-05-31"><br><br>
+						Omschrijving:<br>
+						<input type="text" name="description" class="input-box large-box"><br><br>
+						Koppelen aan gebruiker(s):<br><br>
+						<ul class="form-grid">
+							<li><input type="checkbox" name="assigned" value="riemen"> G. Riemen </li>
+							<li><input type="checkbox" name="assigned" value="maddoe"> T. Langejan </li>
+							<li><input type="checkbox" name="assigned" value="maddoe"> S. Reichert </li>
+							<li><input type="checkbox" name="assigned" value="maddoe"> E. Alblas </li>
+							<li><input type="checkbox" name="assigned" value="maddoe"> E. Maat </li>
+							<li><input type="checkbox" name="assigned" value="maddoe"> J. Adam </li>
+							<li><input type="checkbox" name="assigned" value="maddoe"> M. van de Grift </li>
+							<li><input type="checkbox" name="assigned" value="maddoe"> A. Kattemölle </li>
+							<li><input type="checkbox" name="assigned" value="maddoe"> M. Meniar </li>
+							<li><input type="checkbox" name="assigned" value="maddoe"> G. Metske </li>
+							<li><input type="checkbox" name="assigned" value="maddoe"> G. Nekkers </li>
+							<li><input type="checkbox" name="assigned" value="maddoe"> L. van Rijssen </li>
+							<li><input type="checkbox" name="assigned" value="maddoe"> E. Soetendal </li>
+							<li><input type="checkbox" name="assigned" value="maddoe"> E. Vijverberg </li>
+							<li><input type="checkbox" name="assigned" value="maddoe"> T. Wijffels </li>
+							<li><input type="checkbox" name="assigned" value="maddoe"> R. Kuip </li>
+							<li><input type="checkbox" name="assigned" value="maddoe"> W. van den Brink </li>
+							<li><input type="checkbox" name="assigned" value="maddoe"> M. Buijsman </li>
+							<li><input type="checkbox" name="assigned" value="maddoe"> J. Duijvestijn </li>
+							<li><input type="checkbox" name="assigned" value="maddoe"> G. Kloosterboer </li>
+							<li><input type="checkbox" name="assigned" value="maddoe"> R. Pauw </li>
+							<li><input type="checkbox" name="assigned" value="maddoe"> M. Ros </li>
+							<li><input type="checkbox" name="assigned" value="maddoe"> S. Maddoe </li>
+							<li><input type="checkbox" name="assigned" value="maddoe"> M. Lammerts </li>
+							<li><input type="checkbox" name="assigned" value="maddoe"> I. Nijman </li>
+							<li><input type="checkbox" name="assigned" value="maddoe"> K. Noordam </li>
+							<li><input type="checkbox" name="assigned" value="maddoe"> A. Onderwater </li>
+							<li><input type="checkbox" name="assigned" value="maddoe"> R. Soodoo </li>
+						</ul>
+					</form>
+					<button type="button">Naar activiteiten</button>
+				</p>
+				</div>
+			</div>
+			<div class="item-m" id="detail-view">
+				<div class="details">
+					<h1>Details</h1>
+					<br>
+					<p class="aleft">Selecteer Evenement</p>
+				</div>	
+			</div>
+		</div>	
+						
+	</div>
+</body>
