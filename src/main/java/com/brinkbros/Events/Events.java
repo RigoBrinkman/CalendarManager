@@ -1,9 +1,10 @@
 package com.brinkbros.Events;
 
-import com.brinkbros.DatabaseDummy;
+import com.brinkbros.DatabaseConnector;
 import com.brinkbros.DateEvent;
 import com.brinkbros.SidePanel;
 import java.util.List;
+import java.util.Properties;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -22,13 +23,14 @@ public abstract class Events extends Panel {
     private static final String EVENT_ROW_ID = "eventRow";
     private static final String SHORT_DESCRIPTION_ID = "shortDescription";
     
+    protected abstract Properties getDBProps();
     protected abstract SidePanel getSidePanel();
     private List<DateEvent> events;
 
     public Events(String id) {
         super(id);
         add(new Label(TEST_ID, new Model("HOOFD")));
-        events = DatabaseDummy.getEvents(20);
+        events = DatabaseConnector.getEvents(getDBProps());
         DataView<DateEvent> dView = new DataView<DateEvent>(EVENT_SPAN_ID, new ListDataProvider<>(events)){
             @Override
             protected void populateItem(Item<DateEvent> item) {

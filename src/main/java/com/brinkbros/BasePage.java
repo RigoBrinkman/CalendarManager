@@ -5,6 +5,9 @@ import com.brinkbros.Overview.Overview;
 import com.brinkbros.addEvent.AddEvent;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.sql.*;
+import java.util.Properties;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -28,7 +31,9 @@ public class BasePage extends WebPage {
 
     private static final PageType START_PAGE = PageType.OVERVIEW;
     
-    private SidePanel sidePanel;
+    private final Properties dbProps;
+    
+    private final SidePanel sidePanel;
     private Panel mainPanel;
 
     private ListView<PageType> options;
@@ -36,12 +41,17 @@ public class BasePage extends WebPage {
 
     public BasePage(final PageParameters parameters) {
         super(parameters);
+        dbProps = new Properties();
+        dbProps.put("user", "thecorz0_planner");
+        dbProps.put("password", "PFSPO2018test");
+        dbProps.put("useLegacyDatetimeCode", "false");
+        dbProps.put("serverTimezone", "UTC");
         sidePanel = new SidePanel(SIDE_PANEL_ID);
         sidePanel.setOutputMarkupId(true);
         sidePanel.setOutputMarkupPlaceholderTag(true);
         add(sidePanel);
         
-        mainPanel = PageType.OVERVIEW.getPanel(sidePanel);
+        mainPanel = PageType.OVERVIEW.getPanel(dbProps, sidePanel);
         add(mainPanel);
 
         WebMarkupContainer container = new WebMarkupContainer(BUTTON_CONTAINER_ID);
@@ -55,7 +65,7 @@ public class BasePage extends WebPage {
                 AjaxLink button = new AjaxLink(BUTTON_ID) {
                     @Override
                     public void onClick(AjaxRequestTarget target) {
-                        Panel newPanel = buttonType.getPanel(sidePanel);
+                        Panel newPanel = buttonType.getPanel(dbProps, sidePanel);
                         mainPanel.replaceWith(newPanel);
                         target.add(newPanel);
                         mainPanel = newPanel;
@@ -99,8 +109,12 @@ public class BasePage extends WebPage {
 
         OVERVIEW("Overzicht", "overviewButton", true) {
                     @Override
-                    public Panel createPanel(String panelId, SidePanel sidePanel) {
+                    public Panel createPanel(String panelId, Properties dbProps, SidePanel sidePanel) {
                         return new Overview(panelId) {
+                            @Override
+                            public Properties getDBProps(){
+                                return dbProps;
+                            }
                             @Override
                             public SidePanel getSidePanel() {
                                 return sidePanel;
@@ -111,8 +125,12 @@ public class BasePage extends WebPage {
                 },
         EVENTS("Evenementen", "eventsButton", true) {
                     @Override
-                    public Panel createPanel(String panelId, SidePanel sidePanel) {
+                    public Panel createPanel(String panelId, Properties dbProps, SidePanel sidePanel) {
                         return new Events(panelId) {
+                            @Override
+                            public Properties getDBProps(){
+                                return dbProps;
+                            }
                             @Override
                             public SidePanel getSidePanel() {
                                 return sidePanel;
@@ -122,7 +140,7 @@ public class BasePage extends WebPage {
                 },
         ADDEVENT("Nieuw evenement", "addEventButton", true){
             @Override
-            protected Panel createPanel(String panelId, SidePanel sidePanel) {
+            protected Panel createPanel(String panelId, Properties dbProps, SidePanel sidePanel) {
                 return new AddEvent(panelId){
                     @Override
                     public SidePanel getSidePanel() {
@@ -136,8 +154,9 @@ public class BasePage extends WebPage {
         private final String id;
         private final String name;
         private final boolean isSidePanelVisible;
+        private Optional<Panel> panel = Optional.empty();
 
-        protected abstract Panel createPanel(String panelId, SidePanel sidePanel);
+        protected abstract Panel createPanel(String panelId, Properties dbProps, SidePanel sidePanel);
 
         private PageType(String name, String id, boolean isSidePanelVisible) {
             this.name = name;
@@ -155,11 +174,12 @@ public class BasePage extends WebPage {
             return javascript.toString();
         }
 
-        public Panel getPanel(SidePanel sidePanel) {
-            Panel panel = createPanel(PANEL_ID, sidePanel);
-            panel.setMarkupId(getId());
-            panel.setOutputMarkupId(true);
-            return panel;
+        public Panel getPanel(Properties dbProps, SidePanel sidePanel) {
+            if(!panel.isPresent()){
+                panel = Optional.of(createPanel(PANEL_ID, dbProps, sidePanel));
+                panel.get().setOutputMarkupId(true);
+            }
+            return panel.get();
         }
 
         public String getName() {

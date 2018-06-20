@@ -1,10 +1,11 @@
 package com.brinkbros.Overview;
 
 
+import com.brinkbros.DatabaseConnector;
 import com.brinkbros.DateEvent;
-import com.brinkbros.DatabaseDummy;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.sql.*;
 import static java.util.Calendar.DAY_OF_WEEK;
 import static java.util.Calendar.DAY_OF_WEEK_IN_MONTH;
 import static java.util.Calendar.DAY_OF_YEAR;
@@ -13,27 +14,24 @@ import static java.util.Calendar.SUNDAY;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Properties;
 
     public class ODMonth extends ArrayList<ODWeek> {
 
         private final Calendar monthCal;
-        private final Calendar thisMonth;
-        private final Calendar today;
         private final int year;
         private final int month;
         private final Calendar firstDay;
         private final Calendar lastDay;
         private final HashMap<Integer, OverviewDate> dates;
 
-        private ODMonth(int year, int month) {
+        public ODMonth(int year, int month, Properties dbProps) {
             super();
             monthCal = new GregorianCalendar(year, month, 1);
             monthCal.set(DAY_OF_WEEK, SUNDAY);
             monthCal.set(DAY_OF_WEEK_IN_MONTH, 1);
             monthCal.setFirstDayOfWeek(MONDAY);
-            thisMonth = (Calendar) monthCal.clone();
             monthCal.roll(DAY_OF_WEEK, true);
-            today = Calendar.getInstance();
             this.year = year;
             this.month = month;
             this.dates = new HashMap();
@@ -49,7 +47,7 @@ import java.util.List;
 
             this.firstDay = get(0).get(0).getCalendar();
             this.lastDay = get(size() - 1).get(6).getCalendar();
-            List<DateEvent> events = DatabaseDummy.getEvents(firstDay, lastDay);
+            List<DateEvent> events = DatabaseConnector.getEvents(dbProps, firstDay, lastDay);
             for (DateEvent e : events) {
                 dates.get(e.getCalendar().get(DAY_OF_YEAR)).addEvent(e);
             }
@@ -78,9 +76,5 @@ import java.util.List;
 
         public int getYear() {
             return year;
-        }
-
-        public static ODMonth getInstance(int year, int month) {
-            return new ODMonth(year, month);
         }
     }

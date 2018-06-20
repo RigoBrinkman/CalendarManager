@@ -17,7 +17,7 @@ public class SidePanel extends Panel {
     }
     
     public void changeDetails(AjaxRequestTarget target, DateEvent event){
-        Label newLabel = new Label(HEAD_ID, DatabaseDummy.getDetails(event.getId()));
+        Label newLabel = new Label(HEAD_ID, event.getDescription());
         details.replaceWith(newLabel);
         newLabel.setOutputMarkupId(true);
         target.add(newLabel);

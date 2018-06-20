@@ -1,5 +1,6 @@
 package com.brinkbros.Overview;
 
+import com.brinkbros.DatabaseConnector;
 import com.brinkbros.DateEvent;
 import com.brinkbros.SidePanel;
 import java.util.Calendar;
@@ -7,6 +8,7 @@ import static java.util.Calendar.DAY_OF_MONTH;
 import static java.util.Calendar.MONTH;
 import static java.util.Calendar.YEAR;
 import java.util.List;
+import java.util.Properties;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -39,7 +41,8 @@ public abstract class Overview extends Panel {
     private static final String NEXT_ID = "nextButton";
     private static final String NEXT_VALUE = "Volgende";
 
-    public abstract SidePanel getSidePanel();
+    protected abstract Properties getDBProps();
+    protected abstract SidePanel getSidePanel();
 
     static {
         Calendar cal = Calendar.getInstance();
@@ -56,7 +59,7 @@ public abstract class Overview extends Panel {
         this.month = THIS_MONTH;
         this.year = THIS_YEAR;
         WebMarkupContainer tableContainer = new WebMarkupContainer(TABLE_CONTAINER_ID);
-        table = new CalendarTable(TABLE_ID, OverviewDate.getWeekList(year, month));
+        table = new CalendarTable(TABLE_ID, new ODMonth(year, month, getDBProps()));
         table.setOutputMarkupId(true);
         tableContainer.add(table);
         tableContainer.setOutputMarkupId(true);
@@ -71,7 +74,7 @@ public abstract class Overview extends Panel {
                 } else {
                     month--;
                 }
-                table = new CalendarTable(TABLE_ID, OverviewDate.getWeekList(year, month));
+                table = new CalendarTable(TABLE_ID, new ODMonth(year, month, getDBProps()));
                 tableContainer.replace(table);
                 target.add(tableContainer);
 
@@ -98,7 +101,7 @@ public abstract class Overview extends Panel {
             public void onClick(AjaxRequestTarget target) {
                 month = THIS_MONTH;
                 year = THIS_YEAR;
-                table = new CalendarTable(TABLE_ID, OverviewDate.getWeekList(year, month));
+                table = new CalendarTable(TABLE_ID, new ODMonth(year, month, getDBProps()));
                 tableContainer.replace(table);
                 target.add(tableContainer);
             }
@@ -128,7 +131,7 @@ public abstract class Overview extends Panel {
                 } else {
                     month++;
                 }
-                table = new CalendarTable(TABLE_ID, OverviewDate.getWeekList(year, month));
+                table = new CalendarTable(TABLE_ID, new ODMonth(year, month, getDBProps()));
                 tableContainer.replace(table);
                 target.add(tableContainer);
             }

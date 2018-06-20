@@ -2,7 +2,6 @@ package com.brinkbros.Overview;
 
 import com.brinkbros.DateEvent;
 import com.brinkbros.BasePage;
-import com.brinkbros.DatabaseDummy;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -20,8 +19,8 @@ public class OverviewDate implements Serializable {
     boolean isToday;
     boolean curentMonth;
 
-    protected OverviewDate(Calendar calendar, boolean currentMonth) {
-        this.curentMonth = currentMonth;
+    protected OverviewDate(Calendar calendar, boolean isToday) {
+        this.isToday = isToday;
         this.calendar = (Calendar) calendar.clone();
         events = new ArrayList();
         isToday = false;
@@ -112,21 +111,5 @@ public class OverviewDate implements Serializable {
     private void setToday(boolean today) {
         isToday = today;
     }
-
-    public static ODMonth getWeekList(int year, int month) {
-        ODMonth odMonth = ODMonth.getInstance(year, month);
-
-        DatabaseDummy.getEvents(
-                odMonth.getFirstDay(), odMonth.getLastDay())
-                .stream()
-                .forEach((DateEvent x) -> {
-                    if (odMonth.hasOverViewDate(x.getCalendar())) {
-                        odMonth.getOverviewDate(x.getCalendar());
-                    }
-                });
-
-        return odMonth;
-    }
-
 
 }

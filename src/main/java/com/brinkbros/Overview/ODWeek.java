@@ -14,14 +14,16 @@ public class ODWeek extends ArrayList<OverviewDate> {
     private int weekOfMonth;
     private Calendar firstDay;
     private Calendar lastDay;
+    private final Calendar today;
 
     protected ODWeek(Calendar cal) {
         super();
+        today = Calendar.getInstance();
 
         firstDay = (Calendar) cal.clone();
 
         for (int i = 0; i < 7; i++) {
-            add(new OverviewDate(cal, true));
+            add(new OverviewDate(cal, cal.get(Calendar.DAY_OF_YEAR) == today.get(Calendar.DAY_OF_YEAR)));
             cal.roll(DAY_OF_WEEK, true);
         }
 

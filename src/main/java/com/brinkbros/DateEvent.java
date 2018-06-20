@@ -3,18 +3,27 @@ package com.brinkbros;
 import java.io.Serializable;
 import java.util.Calendar;
 
-public class DateEvent implements Serializable {
+public final class DateEvent implements Serializable {
 
-    private final String name;
-    private final Calendar calendar;
-    private final EventColor color;
     private final int id;
+    private final Calendar calendar;
+    private final String title;
+    private final String description;
+    private final int category;
+    private final int type;
+    private final int status;
+    private final EventColor color;
 
-    protected DateEvent(String name, Calendar calendar, EventColor color, int id) {
-        this.name = name;
-        this.calendar = calendar;
-        this.color = color;
+    protected DateEvent(int id, Calendar calendar, String title, String description, int category, int type, int status) {
         this.id = id;
+        this.calendar = calendar;
+        this.title = title;
+        this.description = description;
+        this.category = category;
+        this.type = type;
+        this.status = status;
+        this.color = EventColor.getColor(category);
+
     }
 
     public Calendar getCalendar() {
@@ -24,20 +33,24 @@ public class DateEvent implements Serializable {
     public EventColor getColor() {
         return color;
     }
+    
+    public String getDescription(){
+        return description;
+    }
 
     public int getId() {
         return id;
     }
 
     public String getName() {
-        return name;
+        return title;
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb
-                .append(name)
+                .append(title)
                 .append('(')
                 .append(color)
                 .append(')');
@@ -52,6 +65,21 @@ public class DateEvent implements Serializable {
         YELLOW("color: yellow;");
 
         private final String styleAttr;
+        
+        public static EventColor getColor(int category){
+            switch(category){
+                case Category.CATEGORY1:
+                    return BLUE;
+                case Category.CATEGORY2:
+                    return GREEN;
+                case Category.CATEGORY3:
+                    return RED;
+                case Category.CATEGORY4:
+                    return YELLOW;
+                default:
+                    throw new IllegalArgumentException("Unknown category " + category);
+            }
+        }
 
         private EventColor(String styleAttr) {
             this.styleAttr = styleAttr;
@@ -60,5 +88,25 @@ public class DateEvent implements Serializable {
         public String getStyleAttr() {
             return styleAttr;
         }
+    }
+    public static class Category{
+        public static final int CATEGORY1 = 101;
+        public static final int CATEGORY2 = 102;
+        public static final int CATEGORY3 = 103;
+        public static final int CATEGORY4 = 104;
+    }
+    
+    public static class Type{
+        public static final int EVENT = 201;
+        public static final int DOSSIER = 202;
+    }
+    
+    public static class Status{
+        public static final int PREPARATION = 301;
+        public static final int ACTIVE = 302;
+        public static final int ON_HOLD = 303;
+        public static final int COMPLETED = 304;
+        public static final int ABANDONED = 305;
+    
     }
 }
