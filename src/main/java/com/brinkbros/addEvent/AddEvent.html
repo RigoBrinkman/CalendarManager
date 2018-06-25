@@ -1,16 +1,20 @@
 <wicket:panel>
     <form wicket:id="eventForm">
-        <!--date-->
+        <input type="date" wicket:id="dateField">
         <input type="text" wicket:id="titleField"/>
         <textarea wicket:id="descriptionArea"></textarea>
-        <!--category-->
-        <span wicket:id="typeRadio">
-            <span wicket:id="typeRadioSpan">
-                <input type="radio" wicket:id="typeRadioChoice"/>
-                <span wicket:id="typeRadioLabel"></span>
-            </span>
+        <br>
+        <span wicket:id="categoryRadio"></span>
+        <br>
+        <span wicket:id="typeRadio"></span>
+        <br>
+        <span wicket:id="statusRadio"></span>
+        <br>
+        <span wicket:id="subeventList">
+            
         </span>
-        <!--subEvents-->
-        <!--submit-->
+        <input type="button" wicket:id="addSubeventButton">
+        <br>
+        <input type="submit" wicket:id="subBttn" value="Versturen"/>
     </form>
 </wicket:panel>

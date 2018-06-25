@@ -14,6 +14,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.TimeZone;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DatabaseConnector {
 
@@ -35,36 +37,55 @@ public class DatabaseConnector {
      */
     private static final String SELECT_EVENT_QUERY = "SELECT * FROM `PF_EVENTS`";
     private static final String SELECT_EVENT_BETWEEN_QUERY = "SELECT * FROM `PF_EVENTS` WHERE `END_DATE` BETWEEN ? AND ?";
+    private static final String DELETE_LAST_ROW = "delete from `PF_EVENTS` order by EVENT_ID desc limit 1";
 
     static {
         TimeZone.setDefault(TimeZone.getTimeZone("Europe"));
     }
 
     public static void main(String[] args) {
-    }
+        Properties props = new Properties();
+        props = new Properties();
+        props.put("user", "thecorz0_planner");
+        props.put("password", "PFSPO2018test");
+        props.put("useLegacyDatetimeCode", "false");
+        props.put("serverTimezone", "UTC");
 
-    private static String calToString(Calendar cal) {
+        try (Connection conn = DriverManager.getConnection(DB_URL, props)) {
+            try(Statement stmnt = conn.createStatement()){
+                stmnt.executeUpdate(DELETE_LAST_ROW);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        }
+
+    
+
+    
+
+    public static String calToString(Calendar cal) {
         StringBuilder sb = new StringBuilder();
         sb
                 .append(cal.get(Calendar.YEAR))
                 .append('-')
-                .append(cal.get(Calendar.MONTH) < 10 ? "0" : "")
-                .append(cal.get(Calendar.MONTH))
+                .append(cal.get(Calendar.MONTH) < 9 ? "0" : "")
+                .append(cal.get(Calendar.MONTH) + 1)
                 .append('-')
                 .append(cal.get(Calendar.DAY_OF_MONTH) < 10 ? "0" : "")
                 .append(cal.get(Calendar.DAY_OF_MONTH));
         return sb.toString();
     }
 
-    private static Calendar stringToCal(String str) {
+    public static Calendar stringToCal(String str) {
         Calendar cal = new GregorianCalendar(
                 Integer.parseInt(str.substring(0, 4)),
-                Integer.parseInt(str.substring(5, 7)),
+                Integer.parseInt(str.substring(5, 7)) - 1,
                 Integer.parseInt(str.substring(8, 10)));
         return cal;
     }
 
-    private static int insertEvent(Connection con, String endDate, String title, String description, int category, int type, int status) {
+    public static int insertEvent(Connection con, String endDate, String title, String description, int category, int type, int status) {
         try (PreparedStatement stmnt = con.prepareStatement(INSERT_EVENT_QUERY, Statement.RETURN_GENERATED_KEYS)) {
             stmnt.setString(1, endDate);
             stmnt.setString(2, title);
@@ -129,4 +150,9 @@ public class DatabaseConnector {
         }
         return events;
     }
+
+    public static String getDBURL() {
+        return DB_URL;
+    }
+
 }

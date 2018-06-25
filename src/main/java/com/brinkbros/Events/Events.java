@@ -43,7 +43,6 @@ public abstract class Events extends Panel {
                 };
                 link.add(new Label(EVENT_NAME_ID, new Model(event.getName()))
                         .add(new AttributeModifier("style", new Model(event.getColor().getStyleAttr()))));
-                link.add(new Label(SHORT_DESCRIPTION_ID, new Model("Short description for " + event.getName())));
                 item.add(link);
                 
             }

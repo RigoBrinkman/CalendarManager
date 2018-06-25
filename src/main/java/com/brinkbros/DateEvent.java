@@ -23,7 +23,6 @@ public final class DateEvent implements Serializable {
         this.type = type;
         this.status = status;
         this.color = EventColor.getColor(category);
-
     }
 
     public Calendar getCalendar() {
@@ -59,10 +58,10 @@ public final class DateEvent implements Serializable {
 
     public enum EventColor {
 
-        BLUE("color: blue;"),
-        GREEN("color: green;"),
-        RED("color: red;"),
-        YELLOW("color: yellow;");
+        BLUE("border-color: blue; background-color: lightblue;"),
+        GREEN("border-color: green; background-color: lightgreen;"),
+        RED("border-color: red; background-color: lightcoral;"),
+        YELLOW("border-color: yellow; background-color: lightyellow;");
 
         private final String styleAttr;
         
