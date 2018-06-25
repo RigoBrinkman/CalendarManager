@@ -10,9 +10,15 @@
         <br>
         <span wicket:id="statusRadio"></span>
         <br>
-        <span wicket:id="subeventList">
-            
-        </span>
+        <form wicket:id="subevent">
+            <input type="date" wicket:id="subDate">
+            <input type="text" wicket:id="subTitle"> 
+            <textarea wicket:id="subDescription"></textarea>
+            <span wicket:id="subCategoryRadio"></span>
+            <span wicket:id="subTypeRadio"></span>
+            <span wicket:id="subStatusRadio"></span>
+            <input type="button" wicket:id="deleteSubevent">
+        </form>
         <input type="button" wicket:id="addSubeventButton">
         <br>
         <input type="submit" wicket:id="subBttn" value="Versturen"/>

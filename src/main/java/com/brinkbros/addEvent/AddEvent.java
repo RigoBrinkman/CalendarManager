@@ -12,6 +12,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Properties;
 import org.apache.wicket.Component;
+import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.datetime.StyleDateConverter;
@@ -27,6 +28,8 @@ import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.ValidationError;
 import org.apache.wicket.datetime.markup.html.form.DateTextField;
 import org.apache.wicket.extensions.yui.calendar.DatePicker;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 
@@ -40,6 +43,7 @@ public abstract class AddEvent extends Panel {
     private static final String TYPE_GROUP_ID = "typeRadio";
     private static final String STATUS_GROUP_ID = "statusRadio";
     private static final String SUBEVENT_LIST_ID = "subeventList";
+    private static final String SUBEVENT_ID = "subevent";
     private static final String ADD_SUBEVENT_BUTTON_ID = "addSubeventButton";
     private static final String SUBMIT_BUTTON_ID = "subBttn";
     private static final ArrayList<String> categoryList = new ArrayList();
@@ -70,8 +74,8 @@ public abstract class AddEvent extends Panel {
     private String title;
     private String description;
     private Date date;
-    
-    private List<Form> subeventList;
+
+    private List<SubeventForm> subeventList;
 
     public AddEvent(String id) {
         super(id);
@@ -116,34 +120,43 @@ public abstract class AddEvent extends Panel {
                 throw new RuntimeException(ex.getMessage());
             }
         });
-        
         subeventList = new ArrayList();
-        RepeatingView subEvents = new RepeatingView(SUBEVENT_LIST_ID);
-        
-        AjaxLink addSubevent = new AjaxLink(ADD_SUBEVENT_BUTTON_ID){
+        RepeatingView subEvents = new RepeatingView(SUBEVENT_ID);
+        subEvents.setOutputMarkupId(true);
 
+        AjaxLink addSubevent = new AjaxLink(ADD_SUBEVENT_BUTTON_ID) {
             @Override
             public void onClick(AjaxRequestTarget target) {
-                
+                SubeventForm sef = new SubeventForm(subEvents.newChildId(), new Model(SUBEVENT_ID));
+                sef.setOutputMarkupId(true);
+                subEvents.add(sef);
+                subeventList.add(sef);
+                target.add(form);
+            }
+
+            @Override
+            public void renderHead(IHeaderResponse response) {
+                response
+                        .render(OnDomReadyHeaderItem
+                                .forScript(new StringBuilder()
+                                        .append("document.getElementById(\"")
+                                        .append(getMarkupId())
+                                        .append("\").value=\"")
+                                        .append("Nieuwe subActiviteit")
+                                        .append("\";")
+                                        .toString()));
+                super.renderHead(response);
             }
         };
-        
-        
-
-        
 
         form.add(dateField);
-
         form.add(titleField);
-
         form.add(descriptionField);
-
         form.add(categoryGroup);
-
         form.add(typeGroup);
-
         form.add(statusGroup);
-
+        form.add(subEvents);
+        form.add(addSubevent);
         form.add(submitButton);
 
         add(form);
@@ -163,6 +176,72 @@ public abstract class AddEvent extends Panel {
                 .append('-')
                 .append(input.substring(0, 2));
         return sb.toString();
+    }
+
+    private class SubeventForm extends Form {
+
+        private static final String SUB_DATE_ID = "subDate";
+        private static final String SUB_TITLE_ID = "subTitle";
+        private static final String SUB_DESCRIPTION_ID = "subDescription";
+        private static final String SUB_CATEGORY_ID = "subCategoryRadio";
+        private static final String SUB_TYPE_ID = "subTypeRadio";
+        private static final String SUB_STATUS_ID = "subStatusRadio";
+        private static final String SUB_DELETE_ID = "deleteSubevent";
+
+        private Date date;
+
+        public SubeventForm(String id, IModel model) {
+            super(id, model);
+            DateTextField dateField = new DateTextField(SUB_DATE_ID, new PropertyModel<Date>(this, "date"), new StyleDateConverter("S-", true)) {
+                @Override
+                public String[] getInputTypes() {
+                    return new String[]{"date"};
+                }
+            };
+            dateField.setOutputMarkupId(true);
+
+            TextField titleField = new TextField(SUB_TITLE_ID, new Model("Titel"));
+            titleField.setOutputMarkupId(true);
+
+            TextArea descriptionField = new TextArea(SUB_DESCRIPTION_ID, new Model("Beschrijving"));
+            descriptionField.setOutputMarkupId(true);
+
+            RadioChoice categoryRadio = new RadioChoice(SUB_CATEGORY_ID, new Model(categoryList.get(0)), categoryList);
+            RadioChoice typeRadio = new RadioChoice(SUB_TYPE_ID, new Model(typeList.get(0)), typeList);
+            RadioChoice statusRadio = new RadioChoice(SUB_STATUS_ID, new Model(statusList.get(0)), statusList);
+
+            AjaxLink deleteButton = new AjaxLink(SUB_DELETE_ID, new Model("Verwijder subActiviteit")) {
+                @Override
+                public void onClick(AjaxRequestTarget target) {
+                    subeventList.remove(SubeventForm.this);
+                    MarkupContainer form = SubeventForm.this.getParent().getParent();
+                    SubeventForm.this.remove();
+                    target.add(form);
+                }
+
+                @Override
+                public void renderHead(IHeaderResponse response) {
+                    response
+                            .render(OnDomReadyHeaderItem
+                                    .forScript(new StringBuilder()
+                                            .append("document.getElementById(\"")
+                                            .append(getMarkupId())
+                                            .append("\").value=\"")
+                                            .append("Verwijder subActiviteit")
+                                            .append("\";")
+                                            .toString()));
+                    super.renderHead(response);
+                }
+            };
+            add(dateField);
+            add(titleField);
+            add(descriptionField);
+            add(categoryRadio);
+            add(typeRadio);
+            add(statusRadio);
+            add(deleteButton);
+        }
+
     }
 
 }
