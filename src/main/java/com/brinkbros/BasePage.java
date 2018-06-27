@@ -32,6 +32,7 @@ public class BasePage extends WebPage {
     private static final String BUTTON_CONTAINER_ID = "buttonContainer";
     private static final String BUTTON_ID = "buttonOption";
 
+    private HashMap<PageType, Panel> activePanels;
     private static final PageType START_PAGE = PageType.OVERVIEW;
 
     private final Properties dbProps;
@@ -40,7 +41,6 @@ public class BasePage extends WebPage {
 
     private ListView<PageType> options;
     private AjaxLink clickedButton;
-    private Map<PageType, Panel> activePanels;
 
     public BasePage(final PageParameters parameters) {
         super(parameters);
@@ -49,15 +49,18 @@ public class BasePage extends WebPage {
         dbProps.put("password", "PFSPO2018test");
         dbProps.put("useLegacyDatetimeCode", "false");
         dbProps.put("serverTimezone", "UTC");
-        sidePanel = new SidePanel(SIDE_PANEL_ID);
+        sidePanel = new SidePanel(SIDE_PANEL_ID) {
+            @Override
+            public Properties getDBProps() {
+                return dbProps;
+            }
+        };
         sidePanel.setOutputMarkupId(true);
         sidePanel.setOutputMarkupPlaceholderTag(true);
         add(sidePanel);
-        activePanels = new HashMap(PageType.values().length);
-        for(PageType pt : PageType.values()){
-            activePanels.put(pt, pt.getPanel(dbProps, sidePanel));
-        }
 
+        activePanels = new HashMap();
+        activePanels.put(START_PAGE, START_PAGE.getPanel(dbProps, sidePanel));
         add(activePanels.get(START_PAGE));
 
         WebMarkupContainer container = new WebMarkupContainer(BUTTON_CONTAINER_ID);
@@ -71,17 +74,21 @@ public class BasePage extends WebPage {
                 AjaxLink button = new AjaxLink(BUTTON_ID) {
                     @Override
                     public void onClick(AjaxRequestTarget target) {
+                        if (!activePanels.containsKey(buttonType)) {
+                            activePanels.put(buttonType, buttonType.getPanel(dbProps, sidePanel));
+                        }
                         Panel newPanel = activePanels.get(buttonType);
                         BasePage.this.get(PANEL_ID).replaceWith(newPanel);
                         target.add(newPanel);
                         sidePanel.setVisible(buttonType.isSidePanelVisible());
                         target.add(sidePanel);
-
-                        clickedButton.setEnabled(true);
-                        target.add(clickedButton);
-                        clickedButton = this;
-                        clickedButton.setEnabled(false);
-                        target.add(clickedButton);
+                        /*
+                         clickedButton.setEnabled(true);
+                         target.add(clickedButton);
+                         clickedButton = this;
+                         clickedButton.setEnabled(false);
+                         target.add(clickedButton);
+                         */
 
                     }
 
@@ -92,10 +99,12 @@ public class BasePage extends WebPage {
                     }
 
                 };
-                if (buttonType == START_PAGE) {
-                    clickedButton = button;
-                    clickedButton.setEnabled(false);
-                }
+                /*
+                 if (buttonType == START_PAGE) {
+                 clickedButton = button;
+                 clickedButton.setEnabled(false);
+                 }
+                 */
                 button.setOutputMarkupId(true);
 
                 item.add(button);
@@ -128,6 +137,22 @@ public class BasePage extends WebPage {
                     }
 
                 },
+        YEARVIEW("JaarOverzicht", "yearviewButton", true){
+            @Override
+            protected Panel createPanel(String panelId, Properties dbProps, SidePanel sidePanel) {
+                return new YearView(panelId){
+                    @Override
+                    public Properties getDBProps() {
+                        return dbProps;
+                    }
+
+                    @Override
+                    public SidePanel getSidePanel() {
+                        return sidePanel;
+                    }
+                };
+            }
+        },
         EVENTS("Evenementen", "eventsButton", true) {
                     @Override
                     public Panel createPanel(String panelId, Properties dbProps, SidePanel sidePanel) {
@@ -152,7 +177,7 @@ public class BasePage extends WebPage {
                             public Properties getDBProps() {
                                 return dbProps;
                             }
-                            
+
                             @Override
                             public SidePanel getSidePanel() {
                                 return sidePanel;
@@ -184,9 +209,9 @@ public class BasePage extends WebPage {
         }
 
         public Panel getPanel(Properties dbProps, SidePanel sidePanel) {
-                Panel panel =  createPanel(PANEL_ID, dbProps, sidePanel);
-                panel.setOutputMarkupId(true);
-                return panel;
+            Panel panel = createPanel(PANEL_ID, dbProps, sidePanel);
+            panel.setOutputMarkupId(true);
+            return panel;
         }
 
         public String getName() {

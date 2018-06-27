@@ -108,8 +108,8 @@ public class OverviewDate implements Serializable {
         return sb.toString();
     }
 
-    private void setToday(boolean today) {
-        isToday = today;
+    public boolean isToday() {
+        return isToday;
     }
 
 }
