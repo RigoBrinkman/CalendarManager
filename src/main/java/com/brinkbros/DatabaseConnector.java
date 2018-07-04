@@ -22,9 +22,30 @@ public class DatabaseConnector {
 
     public enum Table {
 
-        EVENTS("PF_EVENTS", true),
-        SUBEVENTS("PF_SUBEVENTS", true);
-
+        ASSIGNMENTS("PF_ASSIGNMENTS", true)/*
+         1  ASSIGN_ID       int(Auto)
+         2  EVENT_ID        int
+         3  USER_ID         int
+         4  MAIN_ASSIGN     int
+         */,
+        EVENTS("PF_EVENTS", true) /*
+         1  EVENT_ID        int(Auto)
+         2  END_DATE        Date
+         3  CON_AH_DATE     Date
+         4  CON_DI_DATE     Date
+         5  DEF_DATE        Date
+         6  TITLE           String
+         7  DESCRIPTION     String
+         8  CATEGORY        int
+         9  TYPE            int
+         10 STATUS          int
+         11 PAR_ID          int
+         */,
+        USERS("PF_USERS", true)/*
+         1  USER_ID         int(Auto)
+         2  NAME_FULL       String
+         3  MAIL            String
+         */;
         private final String name;
         private boolean autoID;
 
@@ -46,24 +67,6 @@ public class DatabaseConnector {
     private static final String IP_ADDRESS = "162.241.219.107";
     private static final String DB_NAME = "thecorz0_Planner";
     private static final String DB_URL = "jdbc:mysql://" + IP_ADDRESS + ":" + PORT + "/" + DB_NAME;
-    private static final String INSERT_EVENT_QUERY = "INSERT INTO PF_EVENTS(END_DATE, TITLE, DESCRIPTION, CATEGORY, TYPE, STATUS) VALUES (?,?,?,?,?,?)";
-    private static final String INSERT_SUBEVENT_QUERY = "INSERT INTO PF_SUBEVENTS (EVENT_ID, END_DATE, TITLE, DESCRIPTION, CATEGORY, TYPE, STATUS) "
-            + "VALUES (?,?,?,?,?,?,?)";
-    private static final DateEvent ERROR_EVENT = new DateEvent(-1, Calendar.getInstance(), "ERROR", "ERROR", 101, 201, 301);
-
-    /*
-     1   EVENT_ID        int
-     2   END_DATE        Date
-     3   TITLE           String
-     4   Description     String
-     5   CATEGORY        int
-     6   TYPE            int
-     7   STATUS          int
-     */
-    private static final String SELECT_EVENT_QUERY = "SELECT * FROM PF_EVENTS";
-    private static final String SELECT_EVENT_BETWEEN_QUERY = "SELECT * FROM PF_EVENTS WHERE END_DATE BETWEEN ? AND ?";
-    private static final String SELECT_SUBEVENT_QUERY = "SELECT * FROM PF_SUBEVENTS WHERE EVENT_ID = ?";
-    private static final String DELETE_LAST_ROW = "delete from PF_EVENTS order by EVENT_ID desc limit 1";
 
     private static final String INSERT_INTO = "insert into ";
     private static final String VALUES = " values (?";
@@ -72,8 +75,11 @@ public class DatabaseConnector {
     private static final String SELECT_FROM = "select * from ";
     private static final String WHERE = " where ";
     private static final String IS = " = ";
+    private static final String IS_NULL = " is null";
     private static final String BETWEEN = " between ";
     private static final String AND = " and ";
+    private static final String UPDATE = "update ";
+    private static final String SET = " set ";
 
     static {
         TimeZone.setDefault(TimeZone.getTimeZone("Europe"));
@@ -86,23 +92,7 @@ public class DatabaseConnector {
         props.put("password", "PFSPO2018test");
         props.put("useLegacyDatetimeCode", "false");
         props.put("serverTimezone", "UTC");
-
-        /*
-         try (Connection conn = DriverManager.getConnection(DB_URL, props)) {
-         System.out.println(insert(conn, Table.EVENTS, new String[]{"2018-06-17", "Titel", "", String.valueOf(101), String.valueOf(201), String.valueOf(301), "", ""}));
-         } catch (SQLException ex) {
-         ex.printStackTrace();
-         }
-
-         try (Connection conn = DriverManager.getConnection(DB_URL, props);
-         ResultSet rslts = select(conn, Table.EVENTS)) {
-         while (rslts.next()) {
-         System.out.println(rslts.getInt(1) + " " + rslts.getString(2) + " " + rslts.getString(3) + " " + rslts.getString(4) + " " + rslts.getString(5));
-         }
-         } catch (SQLException ex) {
-         ex.printStackTrace();
-         }
-         */
+        
     }
 
     public static ResultSet select(Connection conn, Table table) throws SQLException {
@@ -129,6 +119,12 @@ public class DatabaseConnector {
         return stmnt.executeQuery();
     }
 
+    public static ResultSet select(Connection conn, Table table, String columnName, Calendar from, Calendar to, String notNullColumn) throws SQLException {
+        PreparedStatement stmnt = conn.prepareStatement(SELECT_FROM + table.getName() + WHERE + columnName + BETWEEN + calToString(from) + AND + calToString(to) + AND + notNullColumn + IS_NULL);
+        stmnt.closeOnCompletion();
+        return stmnt.executeQuery();
+    }
+
     public static int insert(Connection conn, Table table, String[] values) throws SQLException {
         StringBuilder sb = new StringBuilder();
         sb
@@ -145,7 +141,7 @@ public class DatabaseConnector {
             if (table.hasAutoID()) {
                 stmnt.setNull(1, Types.INTEGER);
                 for (int i = 0; i < values.length; i++) {
-                    if (values[i].equals("")) {
+                    if (values[i] == null || values[i].equals("")) {
                         stmnt.setNull(i + 2, Types.VARCHAR);
                     } else {
                         stmnt.setString(i + 2, values[i]);
@@ -153,7 +149,7 @@ public class DatabaseConnector {
                 }
             } else {
                 for (int i = 0; i < values.length; i++) {
-                    if (values[i].equals("")) {
+                    if (values[i] == null || values[i].equals("")) {
                         stmnt.setNull(i + 1, Types.INTEGER);
                     } else {
                         stmnt.setString(i + 1, values[i]);
@@ -169,6 +165,42 @@ public class DatabaseConnector {
             } else {
                 return -1;
             }
+        }
+    }
+
+    public static void update(Connection conn, Table table, String[] columns, String[] values, String idColumn, int id) throws SQLException {
+        StringBuilder sb = new StringBuilder();
+        sb
+                .append(UPDATE)
+                .append(table.getName())
+                .append(SET)
+                .append(columns[0])
+                .append(" = ")
+                .append('\'')
+                .append(values[0])
+                .append('\'');
+
+        if (columns.length > 1) {
+            for (int i = 1; i < columns.length; i++) {
+                sb
+                        .append(", ")
+                        .append(columns[i])
+                        .append(" = ")
+                        .append('\'')
+                        .append(values[i])
+                        .append('\'');
+
+            }
+        }
+        sb
+                .append(WHERE)
+                .append(idColumn)
+                .append(IS)
+                .append(id);
+        System.out.println(sb.toString());
+
+        try (PreparedStatement stmnt = conn.prepareStatement(sb.toString())) {
+            stmnt.executeUpdate();
         }
     }
 
@@ -188,6 +220,9 @@ public class DatabaseConnector {
     }
 
     public static Calendar stringToCal(String str) {
+        if (str == null || str.toLowerCase().equals("null") || str.equals("")) {
+            return null;
+        }
         Calendar cal = new GregorianCalendar(
                 Integer.parseInt(str.substring(0, 4)),
                 Integer.parseInt(str.substring(5, 7)) - 1,

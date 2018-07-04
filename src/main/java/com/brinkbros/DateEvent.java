@@ -7,7 +7,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -17,26 +16,61 @@ public final class DateEvent implements Serializable {
     private final Calendar calendar;
     private final String title;
     private final String description;
+    private final boolean hasExtraDeadlines;
+    private final Calendar conAhCal;
+    private final Calendar conDiCal;
+    private final Calendar defCal;
     private final int category;
     private final int type;
     private final int status;
     private final EventColor color;
-    Optional<ArrayList<DateEvent>> subevents;
 
-    public DateEvent(int id, Calendar calendar, String title, String description, int category, int type, int status) {
+    private ArrayList<DateEvent> subevents;
+    private DateEvent parentEvent;
+    private ArrayList<CalmanAssignment> assignments;
+
+    public DateEvent(int id, Calendar calendar, Calendar conAhCal, Calendar conDiCal, Calendar defCal, String title, String description, int category, int type, int status, DateEvent parentEvent) {
         this.id = id;
+        hasExtraDeadlines = conAhCal != null;
         this.calendar = calendar;
+        this.conAhCal = conAhCal;
+        this.conDiCal = conDiCal;
+        this.defCal = defCal;
         this.title = title;
         this.description = description;
         this.category = category;
         this.type = type;
         this.status = status;
         this.color = EventColor.getColor(category);
-        this.subevents = Optional.empty();
+        this.parentEvent = parentEvent;
     }
 
     public Calendar getCalendar() {
         return calendar;
+    }
+
+    public Optional<Calendar> getConAhCal() {
+        if (conAhCal == null) {
+            return Optional.empty();
+        } else {
+            return Optional.of(conAhCal);
+        }
+    }
+
+    public Optional<Calendar> getConDiCal() {
+        if (conDiCal == null) {
+            return Optional.empty();
+        } else {
+            return Optional.of(conDiCal);
+        }
+    }
+
+    public Optional<Calendar> getDefCal() {
+        if (defCal == null) {
+            return Optional.empty();
+        } else {
+            return Optional.of(defCal);
+        }
     }
 
     public String getTitle() {
@@ -58,6 +92,10 @@ public final class DateEvent implements Serializable {
         }
     }
 
+    public int getCategoryInt() {
+        return category;
+    }
+
     public String getType() {
         switch (type) {
             case Type.EVENT:
@@ -69,21 +107,33 @@ public final class DateEvent implements Serializable {
         }
     }
 
+    public int getTypeInt() {
+        return type;
+    }
+
     public String getStatus() {
         switch (status) {
-            case Status.ABANDONED:
-                return "Geannuleerd";
-            case Status.ACTIVE:
-                return "Actief";
-            case Status.COMPLETED:
+            case Status.DEFINITIEF:
+                return "Definitief";
+            case Status.CONCEPT_AH:
+                return "Concept bij afdelingshoofd";
+            case Status.CONCEPT_DR:
+                return "Concept bij directeur";
+            case Status.CONCEPT_BH:
+                return "Concept bij behandelaar";
+            case Status.IN_BEHANDELING:
+                return "In behandeling";
+            case Status.VOLTOOID:
                 return "Voltooid";
-            case Status.ON_HOLD:
-                return "On hold";
-            case Status.PREPARATION:
-                return "In voorbereiding";
+            case Status.GEANNULEERD:
+                return "Geannuleerd";
             default:
                 return "Onbekende status";
         }
+    }
+
+    public int getStatusInt() {
+        return status;
     }
 
     public EventColor getColor() {
@@ -102,26 +152,66 @@ public final class DateEvent implements Serializable {
         return title;
     }
 
-    public ArrayList<DateEvent> getSubevents(Properties dbProps) throws SQLException {
-        if (!subevents.isPresent()) {
+    public DateEvent getParentEvent() {
+        return parentEvent;
+    }
+
+    public ArrayList<CalmanAssignment> getAssignments(Properties dbProps) throws SQLException {
+        if (assignments == null) {
             try (Connection conn = DriverManager.getConnection(DatabaseConnector.getDBURL(), dbProps);
-                    ResultSet rslts = DatabaseConnector.select(conn, DatabaseConnector.Table.SUBEVENTS, "EVENT_ID", id)) {
+                    ResultSet rslts = DatabaseConnector.select(conn, DatabaseConnector.Table.ASSIGNMENTS, "EVENT_ID", id)) {
+                ArrayList<CalmanAssignment> aList = new ArrayList();
+                while (rslts.next()) {
+                    aList.add(new CalmanAssignment(
+                            rslts.getInt(1),
+                            rslts.getInt(2),
+                            CalmanUser.getUser(rslts.getInt(3)),
+                            rslts.getInt(4)
+                    ));
+
+                    assignments = aList;
+                }
+            }
+        }
+        return assignments;
+    }
+
+    public ArrayList<CalmanAssignment> getAssignments() {
+        if (assignments != null) {
+            return assignments;
+        } else {
+            throw new IllegalArgumentException("Assignments have not yet been retrieved from database");
+        }
+    }
+
+    public ArrayList<DateEvent> getSubevents(Properties dbProps) throws SQLException {
+        if (subevents == null) {
+            try (Connection conn = DriverManager.getConnection(DatabaseConnector.getDBURL(), dbProps);
+                    ResultSet rslts = DatabaseConnector.select(conn, DatabaseConnector.Table.EVENTS, "PAR_ID", id)) {
                 ArrayList<DateEvent> aList = new ArrayList();
                 while (rslts.next()) {
                     aList.add(new DateEvent(
-                            rslts.getInt(2), //id
-                            DatabaseConnector.stringToCal(rslts.getString(3)), //calendar
-                            rslts.getString(4), //title
-                            rslts.getString(5), //description
-                            rslts.getInt(6), //category
-                            rslts.getInt(7), //type
-                            rslts.getInt(8) //status
+                            rslts.getInt(1), //id
+                            DatabaseConnector.stringToCal(rslts.getString(2)), //calendar
+                            DatabaseConnector.stringToCal(rslts.getString(3)) == null ? null : DatabaseConnector.stringToCal(rslts.getString(3)), //calendar
+                            DatabaseConnector.stringToCal(rslts.getString(4)) == null ? null : DatabaseConnector.stringToCal(rslts.getString(4)), //calendar
+                            DatabaseConnector.stringToCal(rslts.getString(5)) == null ? null : DatabaseConnector.stringToCal(rslts.getString(5)), //calendar
+                            rslts.getString(6), //title
+                            rslts.getString(7), //description
+                            rslts.getInt(8), //category
+                            rslts.getInt(9), //type
+                            rslts.getInt(10), //status
+                            this //parentEvent
                     ));
                 }
-                subevents = Optional.of(aList);
+                subevents = aList;
             }
         }
-        return new ArrayList(subevents.get());
+        return new ArrayList(subevents);
+    }
+
+    public boolean hasExtraDeadlines() {
+        return hasExtraDeadlines;
     }
 
     @Override
@@ -184,11 +274,13 @@ public final class DateEvent implements Serializable {
 
     public static class Status {
 
-        public static final int PREPARATION = 301;
-        public static final int ACTIVE = 302;
-        public static final int ON_HOLD = 303;
-        public static final int COMPLETED = 304;
-        public static final int ABANDONED = 305;
+        public static final int IN_BEHANDELING = 301;
+        public static final int CONCEPT_AH = 302;
+        public static final int CONCEPT_BH = 303;
+        public static final int CONCEPT_DR = 304;
+        public static final int DEFINITIEF = 305;
+        public static final int VOLTOOID = 306;
+        public static final int GEANNULEERD = 307;
 
     }
 }

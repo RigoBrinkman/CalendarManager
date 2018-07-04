@@ -1,15 +1,12 @@
 package com.brinkbros;
 
-import com.brinkbros.Events.Events;
 import com.brinkbros.Overview.Overview;
 import com.brinkbros.addEvent.AddEvent;
+import com.brinkbros.yearView.YearView;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
-import java.sql.*;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -26,13 +23,13 @@ public class BasePage extends WebPage {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String PANEL_ID = "mycal";
+    public static final String PANEL_ID = "mycal";
     private static final String SIDE_PANEL_ID = "sidePanel";
     private static final String BUTTON_LIST_ID = "buttonList";
     private static final String BUTTON_CONTAINER_ID = "buttonContainer";
     private static final String BUTTON_ID = "buttonOption";
 
-    private HashMap<PageType, Panel> activePanels;
+    public HashMap<PageType, Panel> activePanels;
     private static final PageType START_PAGE = PageType.OVERVIEW;
 
     private final Properties dbProps;
@@ -49,7 +46,18 @@ public class BasePage extends WebPage {
         dbProps.put("password", "PFSPO2018test");
         dbProps.put("useLegacyDatetimeCode", "false");
         dbProps.put("serverTimezone", "UTC");
+        try {
+            CalmanUser.initialize(dbProps);
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+
         sidePanel = new SidePanel(SIDE_PANEL_ID) {
+            @Override
+            public BasePage getBasePage() {
+                return BasePage.this;
+            }
+
             @Override
             public Properties getDBProps() {
                 return dbProps;
@@ -137,26 +145,10 @@ public class BasePage extends WebPage {
                     }
 
                 },
-        YEARVIEW("JaarOverzicht", "yearviewButton", true){
-            @Override
-            protected Panel createPanel(String panelId, Properties dbProps, SidePanel sidePanel) {
-                return new YearView(panelId){
+        YEARVIEW("JaarOverzicht", "yearviewButton", true) {
                     @Override
-                    public Properties getDBProps() {
-                        return dbProps;
-                    }
-
-                    @Override
-                    public SidePanel getSidePanel() {
-                        return sidePanel;
-                    }
-                };
-            }
-        },
-        EVENTS("Evenementen", "eventsButton", true) {
-                    @Override
-                    public Panel createPanel(String panelId, Properties dbProps, SidePanel sidePanel) {
-                        return new Events(panelId) {
+                    protected Panel createPanel(String panelId, Properties dbProps, SidePanel sidePanel) {
+                        return new YearView(panelId) {
                             @Override
                             public Properties getDBProps() {
                                 return dbProps;

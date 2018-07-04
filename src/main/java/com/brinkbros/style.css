@@ -7,9 +7,6 @@ body { font: 14px/1.1 Verdana, Sans-Serif; background: #EEEEEE;}
 img, a img { border: none; flex-shrink: 1; }
 input { outline: none; }
 input[type="radio"]{ margin: 10px; padding: 10px; }
-table { border-collapse: collapse; width: 98%; margin: 1%; } 
-th { padding: 10px 0 10px 0; }
-td { border: 1px solid black; height: 120px; width: 150px;  text-align: left; vertical-align: top; padding: 10px; min-width: 100px; }
 a { text-decoration: none; color: #000000; }
 
 /*
@@ -20,9 +17,12 @@ a { text-decoration: none; color: #000000; }
 .item-m { display: flex; flex-direction: column; height: 863px; }
 #menu-bar { background-color: #EEEEEE; padding: 0; margin: 0; text-align: center; border-bottom: 3px solid black; }
 #main-view { background-color: #FFFFFF; flex: 7; padding: 0; margin: 0; overflow: auto;}
+#main-top { text-align: center; }
+#main-top span { display: block; font: bold 18px/1.1 Verdana, Sans-Serif; }
 #detail-view { background-color: #EEEEEE; flex: 3; min-width: 400px; border-left: 2px solid black; }
 #detail-view span { display: block; }
 #detail-view a span { display: inline-block;}
+#mainTopName { margin: 0 10px 0 0; }
 
 /*
 	TYPOGRAPHY
@@ -32,6 +32,7 @@ h2 { font: bold 16px/1.1 Verdana, Sans-Serif; color: #000000; }
 
 .input-field { background-color: #CCCCCC; color: #000000; border: 1px solid #EEEEEE; border-radius: 0px; padding: 5px 10px 5px 10px; margin: 10px 10px 5px 10px; }
 .calButton { font: 20px/1.1 Verdana, Sans-Serif; background-color: #EEEEEE; border: 0px solid black; height: 50px; cursor: pointer; margin: 10px 5px 10px 5px; }
+.monButton { font: bold 14px/1.1 Verdana, Sans-Serif; background-color: #EEEEEE; border: 1px solid black; margin: 5px 0 5px 0; padding: 5px; cursor: pointer; }
 .calendarItem { display: block; border: 2px solid; border-radius: 6px; margin: 5px; padding: 5px; }
 .calendarItem a { font: inherit; color: inherit; text-decoration: inherit;}
 .hide-element { width: 0.1px; height: 0.1px; opacity: 0; overflow: hidden; position: absolute; z-index: -1; }
@@ -51,3 +52,14 @@ h2 { font: bold 16px/1.1 Verdana, Sans-Serif; color: #000000; }
 .small-box {}
 .large-box { height: 100px; }
 .form-grid li { display: block; float: left; width: 25%; }
+.dataview { border-collapse: collapse; width: 98%; margin: 1%; } 
+.dataview th { padding: 10px 0 10px 0; }
+.dataview td { border: 1px solid black; height: 100px; width: 150px;  text-align: left; vertical-align: top; padding: 10px; min-width: 100px; }
+.yearCal { display: inline-table; border-collapse: collapse; margin: 20px; }
+.yearCal td { height: 40px; border-top: 1px solid black; }
+.eventCol { min-width: 200px; }
+.yearCal th { height: 30px; border: 0px; }
+.yearTabContainer { overflow: auto; white-space: nowrap; }
+.form-block { display: block; }
+.form-title { font: bold 16px/1.1 Verdana, Sans-Serif; }
+.form-inline-block { display: inline-block; }

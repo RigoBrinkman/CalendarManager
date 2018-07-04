@@ -1,10 +1,12 @@
 package com.brinkbros.Overview;
 
+import com.brinkbros.CalmanDate;
 import com.brinkbros.DatabaseConnector;
 import com.brinkbros.DateEvent;
 import com.brinkbros.SidePanel;
 import java.io.Serializable;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import static java.util.Calendar.DAY_OF_MONTH;
 import static java.util.Calendar.MONTH;
@@ -69,7 +71,7 @@ public abstract class Overview extends Panel {
         add(monthName);
 
         WebMarkupContainer tableContainer = new WebMarkupContainer(TABLE_CONTAINER_ID);
-        table = new CalendarTable(TABLE_ID, new ODMonth(year, month, getDBProps()));
+        table = new CalendarTable(TABLE_ID, OverviewMonth.build(year, month, getDBProps()));
         table.setOutputMarkupId(true);
         tableContainer.add(table);
         tableContainer.setOutputMarkupId(true);
@@ -85,7 +87,7 @@ public abstract class Overview extends Panel {
                     month--;
                 }
                 monthName.setDefaultModelObject(getMonthName());
-                table = new CalendarTable(TABLE_ID, new ODMonth(year, month, getDBProps()));
+                table = new CalendarTable(TABLE_ID, OverviewMonth.build(year, month, getDBProps()));
                 tableContainer.replace(table);
                 target.add(tableContainer);
                 target.add(monthName);
@@ -114,7 +116,7 @@ public abstract class Overview extends Panel {
                 month = THIS_MONTH;
                 year = THIS_YEAR;
                 monthName.setDefaultModelObject(getMonthName());
-                table = new CalendarTable(TABLE_ID, new ODMonth(year, month, getDBProps()));
+                table = new CalendarTable(TABLE_ID, OverviewMonth.build(year, month, getDBProps()));
                 tableContainer.replace(table);
                 target.add(tableContainer);
                 target.add(monthName);
@@ -146,7 +148,7 @@ public abstract class Overview extends Panel {
                     month++;
                 }
                 monthName.setDefaultModelObject(getMonthName());
-                table = new CalendarTable(TABLE_ID, new ODMonth(year, month, getDBProps()));
+                table = new CalendarTable(TABLE_ID, OverviewMonth.build(year, month, getDBProps()));
                 tableContainer.replace(table);
                 target.add(tableContainer);
                 target.add(monthName);
@@ -201,29 +203,28 @@ public abstract class Overview extends Panel {
         }
     }
 
-    private class CalendarTable extends DataView<ODWeek> {
+    private class CalendarTable extends DataView<ArrayList<CalmanDate>> {
 
-        private CalendarTable(String id, ODMonth weekList) {
-            super(id, new ListDataProvider(weekList));
+        private CalendarTable(String id, OverviewMonth month) {
+            super(id, new ListDataProvider(month.weeks()));
 
         }
 
         @Override
-        protected void populateItem(Item<ODWeek> item) {
+        protected void populateItem(Item<ArrayList<CalmanDate>> item) {
 
-            ODWeek dayList = item.getModelObject();
+            ArrayList week = item.getModelObject();
 
-            item.add(new DataView<OverviewDate>(CELL_ID,
-                    new ListDataProvider(dayList)) {
+            item.add(new DataView<CalmanDate>(CELL_ID,
+                    new ListDataProvider(week)) {
 
                         @Override
-                        protected void populateItem(Item<OverviewDate> item) {
-                            OverviewDate overviewDate = item.getModelObject();
+                        protected void populateItem(Item<CalmanDate> item) {
+                            CalmanDate date = item.getModelObject();
                             item.add(new Label(DAY_ID,
-                                            String.valueOf(overviewDate.getCalendar().get(DAY_OF_MONTH)) + (overviewDate.isToday() ? " Vandaag" : "")));
+                                            String.valueOf(date.getCalendar().get(DAY_OF_MONTH)) + (date.isToday() ? " Vandaag" : "")));
 
-                            List<DateEvent> events = overviewDate.getEvents();
-                            item.add(new DataView<DateEvent>(EVENTS_ID, new ListDataProvider(events)) {
+                            item.add(new DataView<DateEvent>(EVENTS_ID, new ListDataProvider(date.getEvents())) {
 
                                 @Override
                                 protected void populateItem(Item<DateEvent> item) {

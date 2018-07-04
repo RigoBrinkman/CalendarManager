@@ -1,4 +1,4 @@
-package com.brinkbros.Overview;
+package com.brinkbros;
 
 import com.brinkbros.DateEvent;
 import com.brinkbros.BasePage;
@@ -12,27 +12,22 @@ import static java.util.Calendar.YEAR;
 import java.util.List;
 import java.util.Objects;
 
-public class OverviewDate implements Serializable {
+public class CalmanDate implements Serializable {
 
     Calendar calendar;
     List<DateEvent> events;
     boolean isToday;
     boolean curentMonth;
 
-    protected OverviewDate(Calendar calendar, boolean isToday) {
-        this.isToday = isToday;
+    public CalmanDate(Calendar calendar) {
+        this.isToday = calendar.get(Calendar.DAY_OF_YEAR) == Calendar.getInstance().get(Calendar.DAY_OF_YEAR) && calendar.get(Calendar.YEAR) == Calendar.getInstance().get(Calendar.YEAR);
         this.calendar = (Calendar) calendar.clone();
         events = new ArrayList();
         isToday = false;
 
     }
 
-    public static void main(String[] args) {
-        System.out.println(BasePage.PageType.OVERVIEW.getValueJavascript("TEST_ID"));
-
-    }
-
-    protected void addEvent(DateEvent de) {
+    public void addEvent(DateEvent de) {
         events.add(de);
     }
 
@@ -71,7 +66,7 @@ public class OverviewDate implements Serializable {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final OverviewDate other = (OverviewDate) obj;
+        final CalmanDate other = (CalmanDate) obj;
         if (!Objects.equals(this.calendar, other.calendar)) {
             return false;
         }
