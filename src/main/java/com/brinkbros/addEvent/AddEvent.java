@@ -65,7 +65,7 @@ public abstract class AddEvent extends Panel {
     private static final String DEADLINE_CHECK_LABEL = "Extra deadlines toevoegen";
     private static final String CON_AH_LABEL = "Concept bij afdelingshoofd";
     private static final String CON_DI_LABEL = "Concept bij directeur";
-    private static final String DEF_LABEL = "Definitief";
+    private static final String DEF_LABEL = "Verzondens naar IZ";
 
     private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -445,7 +445,7 @@ public abstract class AddEvent extends Panel {
                                 DatabaseConnector.insert(conn, DatabaseConnector.Table.ASSIGNMENTS, new String[]{
                                     String.valueOf(subEventID),
                                     String.valueOf(CalmanUser.getUser(usernameList.get(Integer.parseInt(sef.assignmentList.get(i).getInput()))).getUserId()),
-                                    String.valueOf(Integer.parseInt(assignmentTypeList.get(i).getInput()))
+                                    String.valueOf(Integer.parseInt(sef.assignmentTypeList.get(i).getInput()))
                                 });
                             }
                         }

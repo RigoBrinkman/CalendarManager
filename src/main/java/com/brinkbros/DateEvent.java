@@ -229,7 +229,7 @@ public final class DateEvent implements Serializable {
 
         BLUE("border-color: blue; background-color: lightblue;"),
         GREEN("border-color: green; background-color: lightgreen;"),
-        RED("border-color: red; background-color: lightcoral;"),
+        RED("border-color: black; background-color: white;"),
         YELLOW("border-color: yellow; background-color: lightyellow;");
 
         private final String styleAttr;
