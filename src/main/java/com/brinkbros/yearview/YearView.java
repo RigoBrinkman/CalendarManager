@@ -7,7 +7,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Properties;
-import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -20,7 +19,7 @@ import org.apache.wicket.markup.repeater.data.DataView;
 import org.apache.wicket.markup.repeater.data.ListDataProvider;
 import org.apache.wicket.model.Model;
 
-public abstract class YearView extends Panel {
+public class YearView extends Panel {
 
   private static final String YEAR_LABEL_ID = "yearLabel";
   private static final String TABLE_CONTAINER_ID = "tableContainer";
@@ -39,18 +38,18 @@ public abstract class YearView extends Panel {
   private static final String GOTO_NOW_VALUE = "Huidig jaar";
   private static final String NEXT_VALUE = "Volgend jaar";
 
-  public abstract Properties getDbProps();
-
-  public abstract SidePanel getSidePanel();
-
+  private Properties dbProps;
+  private SidePanel sidePanel;
   private Label yearLabel;
   private WebMarkupContainer tableContainer;
   private int year;
   private YearviewYear yvYear;
   private DataView months;
 
-  public YearView(String id) {
+  public YearView(String id, Properties dbProps, SidePanel sidePanel) {
     super(id);
+    this.dbProps = dbProps;
+    this.sidePanel = sidePanel;
     year = Calendar.getInstance().get(Calendar.YEAR);
 
     yearLabel = new Label(YEAR_LABEL_ID, new Model(String.valueOf(year)));
@@ -61,7 +60,7 @@ public abstract class YearView extends Panel {
     tableContainer.setOutputMarkupId(true);
     add(tableContainer);
     {
-      yvYear = YearviewYear.build(year, getDbProps());
+      yvYear = YearviewYear.build(year, dbProps);
 
       months = getMonthsDataView(yvYear);
       months.setOutputMarkupId(true);
@@ -72,7 +71,7 @@ public abstract class YearView extends Panel {
       public void onClick(AjaxRequestTarget target) {
         year--;
         yearLabel.setDefaultModelObject(String.valueOf(year));
-        yvYear = YearviewYear.build(year, getDbProps());
+        yvYear = YearviewYear.build(year, dbProps);
         tableContainer.get(MONTH_TABLE_ID).replaceWith(getMonthsDataView(yvYear));
         target.add(tableContainer);
         target.add(yearLabel);
@@ -99,7 +98,7 @@ public abstract class YearView extends Panel {
       public void onClick(AjaxRequestTarget target) {
         year = Calendar.getInstance().get(Calendar.YEAR);
         yearLabel.setDefaultModelObject(String.valueOf(year));
-        yvYear = YearviewYear.build(year, getDbProps());
+        yvYear = YearviewYear.build(year, dbProps);
         tableContainer.get(MONTH_TABLE_ID).replaceWith(getMonthsDataView(yvYear));
         target.add(tableContainer);
         target.add(yearLabel);
@@ -126,7 +125,7 @@ public abstract class YearView extends Panel {
       public void onClick(AjaxRequestTarget target) {
         year++;
         yearLabel.setDefaultModelObject(String.valueOf(year));
-        yvYear = YearviewYear.build(year, getDbProps());
+        yvYear = YearviewYear.build(year, dbProps);
         tableContainer.get(MONTH_TABLE_ID).replaceWith(getMonthsDataView(yvYear));
         target.add(tableContainer);
         target.add(yearLabel);
@@ -169,7 +168,7 @@ public abstract class YearView extends Panel {
                   @Override
                   public void onClick(AjaxRequestTarget target) {
                     try {
-                      getSidePanel().changeDetails(target, event);
+                      sidePanel.changeDetails(target, event);
                     } catch (SQLException ex) {
                       throw new RuntimeException(ex.getMessage());
                     }

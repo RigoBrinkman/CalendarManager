@@ -20,7 +20,7 @@ import org.apache.wicket.markup.repeater.data.DataView;
 import org.apache.wicket.markup.repeater.data.ListDataProvider;
 import org.apache.wicket.model.Model;
 
-public abstract class Overview extends Panel {
+public class Overview extends Panel {
 
   private static final int THIS_MONTH;
   private static final int THIS_YEAR;
@@ -40,22 +40,23 @@ public abstract class Overview extends Panel {
   private static final String NEXT_ID = "nextButton";
   private static final String NEXT_VALUE = "Volgende";
 
-  protected abstract Properties getDbProps();
-
-  protected abstract SidePanel getSidePanel();
-
   static {
     Calendar cal = Calendar.getInstance();
     THIS_MONTH = cal.get(Calendar.MONTH);
     THIS_YEAR = cal.get(Calendar.YEAR);
   }
+  
+  private Properties dbProps;
+  private SidePanel sidePanel;
   private int month;
   private int year;
 
   private CalendarTable table;
 
-  public Overview(String id) {
+  public Overview(String id, Properties dbProps, SidePanel sidePanel) {
     super(id);
+    this.dbProps = dbProps;
+    this.sidePanel = sidePanel;
     this.month = THIS_MONTH;
     this.year = THIS_YEAR;
     Label monthName = new Label(MONTHNAME_ID, new Model(getMonthName()));
@@ -63,7 +64,7 @@ public abstract class Overview extends Panel {
     add(monthName);
 
     WebMarkupContainer tableContainer = new WebMarkupContainer(TABLE_CONTAINER_ID);
-    table = new CalendarTable(TABLE_ID, OverviewMonth.build(year, month, getDbProps()));
+    table = new CalendarTable(TABLE_ID, OverviewMonth.build(year, month, dbProps));
     table.setOutputMarkupId(true);
     tableContainer.add(table);
     tableContainer.setOutputMarkupId(true);
@@ -79,7 +80,7 @@ public abstract class Overview extends Panel {
           month--;
         }
         monthName.setDefaultModelObject(getMonthName());
-        table = new CalendarTable(TABLE_ID, OverviewMonth.build(year, month, getDbProps()));
+        table = new CalendarTable(TABLE_ID, OverviewMonth.build(year, month, dbProps));
         tableContainer.replace(table);
         target.add(tableContainer);
         target.add(monthName);
@@ -108,7 +109,7 @@ public abstract class Overview extends Panel {
         month = THIS_MONTH;
         year = THIS_YEAR;
         monthName.setDefaultModelObject(getMonthName());
-        table = new CalendarTable(TABLE_ID, OverviewMonth.build(year, month, getDbProps()));
+        table = new CalendarTable(TABLE_ID, OverviewMonth.build(year, month, dbProps));
         tableContainer.replace(table);
         target.add(tableContainer);
         target.add(monthName);
@@ -140,7 +141,7 @@ public abstract class Overview extends Panel {
           month++;
         }
         monthName.setDefaultModelObject(getMonthName());
-        table = new CalendarTable(TABLE_ID, OverviewMonth.build(year, month, getDbProps()));
+        table = new CalendarTable(TABLE_ID, OverviewMonth.build(year, month, dbProps));
         tableContainer.replace(table);
         target.add(tableContainer);
         target.add(monthName);
@@ -227,9 +228,9 @@ public abstract class Overview extends Panel {
                     @Override
                     public void onClick(AjaxRequestTarget target) {
                       try {
-                        getSidePanel().changeDetails(target, event);
+                        sidePanel.changeDetails(target, event);
                       } catch (SQLException ex) {
-                        getSidePanel().changeDetails(target, ex.getMessage());
+                        sidePanel.changeDetails(target, ex.getMessage());
                       }
                     }
 

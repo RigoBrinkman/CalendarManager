@@ -23,7 +23,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.Model;
 
-public abstract class SidePanel extends Panel {
+public class SidePanel extends Panel {
 
   private static final String TITLE_ID = "title";
   private static final String DATE_ID = "date";
@@ -58,10 +58,9 @@ public abstract class SidePanel extends Panel {
   private static final AttributeModifier RED_TEXT_MODIFIER = new AttributeModifier("style", new Model("color: red;"));
   private static final AttributeModifier BLACK_TEXT_MODIFIER = new AttributeModifier("style", new Model("color: black;"));
 
-  public abstract BasePage getBasePage();
 
-  public abstract Properties getDBProps();
-
+  Properties dbProps;
+  BasePage basePage;
   Label title;
   Label date;
   Label conAh;
@@ -88,9 +87,11 @@ public abstract class SidePanel extends Panel {
 
   private final String id;
 
-  protected SidePanel(String id) {
+  protected SidePanel(String id, Properties dbProps, BasePage basePage) {
     super(id);
     this.id = id;
+    this.dbProps = dbProps;
+    this.basePage = basePage;
 
     title = new Label(TITLE_ID, new Model("Details"));
     title.setOutputMarkupId(true);
@@ -193,7 +194,7 @@ public abstract class SidePanel extends Panel {
   }
 
   public void changeDetails(AjaxRequestTarget target, CalmanEvent event) throws SQLException {
-    Connection conn = DriverManager.getConnection(DatabaseConnector.getDbUrl(), getDBProps());
+    Connection conn = DriverManager.getConnection(DatabaseConnector.getDbUrl(), dbProps);
 
     title.setDefaultModelObject(event.getTitle() + (event.isDeadlineViolated() ? "!!!" : ""));
     target.add(title);
@@ -287,10 +288,10 @@ public abstract class SidePanel extends Panel {
         editStatusSubmit = new Button(EDIT_STATUS_SUBMIT_ID) {
           @Override
           public void onSubmit() {
-            try (Connection conn = DriverManager.getConnection(DatabaseConnector.getDbUrl(), getDBProps())) {
+            try (Connection conn = DriverManager.getConnection(DatabaseConnector.getDbUrl(), dbProps)) {
               conn.createStatement().executeUpdate("UPDATE PF_EVENTS SET status = " + String.valueOf(Integer.parseInt(statusOptions.getInput()) + 301)
                   + " WHERE event_id = " + String.valueOf(event.getId()));
-              getBasePage().resetPanels();
+              basePage.resetPanels();
             } catch (SQLException ex) {
               throw new RuntimeException(ex.getMessage());
             }
@@ -397,25 +398,10 @@ public abstract class SidePanel extends Panel {
     editEvent = new AjaxLink(EDIT_EVENT_ID) {
       @Override
       public void onClick(AjaxRequestTarget target) {
-        AddEvent newPage = new AddEvent(BasePage.PANEL_ID, event) {
-          @Override
-          public SidePanel getSidePanel() {
-            return SidePanel.this;
-          }
-
-          @Override
-          public Properties getDbProps() {
-            return SidePanel.this.getDBProps();
-          }
-
-          @Override
-          public BasePage getBasePage() {
-            return SidePanel.this.getBasePage();
-          }
-        };
-        getBasePage().activePanels.remove(BasePage.PageType.ADDEVENT);
-        getBasePage().replace(newPage);
-        target.add(getBasePage());
+        AddEvent newPage = new AddEvent(BasePage.PANEL_ID, dbProps, SidePanel.this, basePage, event);
+        basePage.activePanels.remove(BasePage.PageType.ADDEVENT);
+        basePage.replace(newPage);
+        target.add(basePage);
       }
 
       @Override

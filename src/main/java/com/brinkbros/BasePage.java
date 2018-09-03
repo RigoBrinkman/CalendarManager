@@ -64,17 +64,7 @@ public class BasePage extends WebPage {
       throw new RuntimeException(e.getMessage());
     }
 
-    sidePanel = new SidePanel(SIDE_PANEL_ID) {
-      @Override
-      public BasePage getBasePage() {
-        return BasePage.this;
-      }
-
-      @Override
-      public Properties getDBProps() {
-        return dbProps;
-      }
-    };
+    sidePanel = new SidePanel(SIDE_PANEL_ID, dbProps, this);
     sidePanel.setOutputMarkupId(true);
     sidePanel.setOutputMarkupPlaceholderTag(true);
     add(sidePanel);
@@ -175,16 +165,7 @@ public class BasePage extends WebPage {
 
   /** Resets the main panel and side panel. This method Should only be called when re-rendering the page!*/
   public void resetPanels() {
-    SidePanel newSidePanel = new SidePanel(SIDE_PANEL_ID) {
-      @Override
-      public BasePage getBasePage() {
-        return BasePage.this;
-      }
-      @Override
-      public Properties getDBProps() {
-        return dbProps;
-      }
-    };
+    SidePanel newSidePanel = new SidePanel(SIDE_PANEL_ID, dbProps, this);
     this.sidePanel.replaceWith(newSidePanel);
     this.sidePanel = newSidePanel;
     this.activePanels.clear();
@@ -208,17 +189,7 @@ public class BasePage extends WebPage {
     OVERVIEW("Overzicht", "overviewButton", true) {
           @Override
           public Panel createPanel(String panelId, Properties dbProps, SidePanel sidePanel, BasePage basePage) {
-            return new Overview(panelId) {
-              @Override
-              public Properties getDbProps() {
-                return dbProps;
-              }
-
-              @Override
-              public SidePanel getSidePanel() {
-                return sidePanel;
-              }
-            };
+            return new Overview(panelId, dbProps, sidePanel);
           }
           @Override
           protected boolean isButtonVisible(int role) {
@@ -229,17 +200,7 @@ public class BasePage extends WebPage {
     YEARVIEW("JaarOverzicht", "yearviewButton", true) {
           @Override
           protected Panel createPanel(String panelId, Properties dbProps, SidePanel sidePanel, BasePage basePage) {
-            return new YearView(panelId) {
-              @Override
-              public Properties getDbProps() {
-                return dbProps;
-              }
-
-              @Override
-              public SidePanel getSidePanel() {
-                return sidePanel;
-              }
-            };
+            return new YearView(panelId, dbProps, sidePanel);
           }
           @Override
           protected boolean isButtonVisible(int role) {
@@ -249,22 +210,7 @@ public class BasePage extends WebPage {
     ADDEVENT("Nieuw evenement", "addEventButton", true) {
           @Override
           protected Panel createPanel(String panelId, Properties dbProps, SidePanel sidePanel, BasePage basePage) {
-            return new AddEvent(panelId) {
-              @Override
-              public Properties getDbProps() {
-                return dbProps;
-              }
-
-              @Override
-              public SidePanel getSidePanel() {
-                return sidePanel;
-              }
-
-              @Override
-              public BasePage getBasePage() {
-                return basePage;
-              }
-            };
+            return new AddEvent(panelId, dbProps, sidePanel, basePage);
           }
           @Override
           protected boolean isButtonVisible(int role) {
@@ -295,12 +241,7 @@ public class BasePage extends WebPage {
     SETTINGS("Instellingen", "settingsButton", true) {
           @Override
           protected Panel createPanel(String panelId, Properties dbProps, SidePanel sidePanel, BasePage basePage) {
-            return new Settings(panelId) {
-              @Override
-              public Properties getDbProps() {
-                return dbProps;
-              }
-            };
+            return new Settings(panelId, dbProps);
           }
           @Override
           protected boolean isButtonVisible(int role) {

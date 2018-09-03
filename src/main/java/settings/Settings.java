@@ -12,20 +12,20 @@ import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.PasswordTextField;
-import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 
-public abstract class Settings extends Panel {
+public class Settings extends Panel {
 
   private static final String PASSWORD_FORM_ID = "passwordForm";
   private static final String PASSWORD_FIELD_ID = "passwordField";
   private static final String PASSWORD_SUBMIT_ID = "passwordSubmit";
 
-  public abstract Properties getDbProps();
+  private Properties dbProps;
 
-  public Settings(String id) {
+  public Settings(String id, Properties dbProps) {
     super(id);
+    this.dbProps = dbProps;
 
     Form passwordForm = new Form(PASSWORD_FORM_ID);
     passwordForm.setOutputMarkupId(true);
@@ -44,7 +44,7 @@ public abstract class Settings extends Panel {
       Button passwordSubmit = new Button(PASSWORD_SUBMIT_ID, new Model("Wijzig wachtwoord")) {
         @Override
         public void onSubmit() {
-          try (Connection conn = DriverManager.getConnection(DatabaseConnector.getDbUrl(), getDbProps());
+          try (Connection conn = DriverManager.getConnection(DatabaseConnector.getDbUrl(), dbProps);
               Statement stmnt = conn.createStatement()) {
             stmnt.executeUpdate("UPDATE PF_USERS SET password = MD5('" + passwordField.getInput() + "') WHERE user_id = 1");
           } catch (SQLException ex) {

@@ -35,7 +35,7 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 
-public abstract class AddEvent extends Panel {
+public class AddEvent extends Panel {
 
   private static final String EVENT_FORM_ID = "eventForm";
   private static final String DATE_FIELD_ID = "dateField";
@@ -103,12 +103,11 @@ public abstract class AddEvent extends Panel {
     assignmentTypesList.add("Overig");
   }
 
-  public abstract SidePanel getSidePanel();
 
-  public abstract Properties getDbProps();
-
-  public abstract BasePage getBasePage();
-
+  private Properties dbProps;
+  private SidePanel sidePanel;
+  private BasePage basePage;
+  
   private RepeatingView subEvents;
   private List<SubeventForm> subeventList;
   private ArrayList<CalmanUser> userList;
@@ -132,9 +131,12 @@ public abstract class AddEvent extends Panel {
   private ArrayList<DropDownChoice> assignmentList;
   private ArrayList<DropDownChoice> assignmentTypeList;
 
-  public AddEvent(String id) {
+  public AddEvent(String id, Properties dbProps, SidePanel sidePanel, BasePage basePage) {
     this(
         id, //wicket id
+        dbProps,
+        sidePanel,
+        basePage,
         -1, //event id
         null,
         null,
@@ -150,9 +152,12 @@ public abstract class AddEvent extends Panel {
         301); //status
   }
 
-  public AddEvent(String id, CalmanEvent event) {
+  public AddEvent(String id, Properties dbProps, SidePanel sidePanel, BasePage basePage, CalmanEvent event) {
     this(
         id, //wicket id
+        dbProps,
+        sidePanel,
+        basePage,
         event.getId(), //event id
         event.getMtAssignee(),
         event.getTrekkerAssignee(),
@@ -168,8 +173,11 @@ public abstract class AddEvent extends Panel {
         event.getStatusInt()); //status
   }
 
-  public AddEvent(String id, int eventId, CalmanUser mtAssignee, CalmanUser trekkerAssignee, ArrayList<CalmanUser> assignments, Calendar date, String title, String description, Calendar deadline1, Calendar deadline2, Calendar deadline3, int category, int type, int status) {
+  public AddEvent(String id, Properties dbProps, SidePanel sidePanel, BasePage basePage, int eventId, CalmanUser mtAssignee, CalmanUser trekkerAssignee, ArrayList<CalmanUser> assignments, Calendar date, String title, String description, Calendar deadline1, Calendar deadline2, Calendar deadline3, int category, int type, int status) {
     super(id);
+    this.dbProps = dbProps;
+    this.sidePanel = sidePanel;
+    this.basePage = basePage;
     this.eventId = eventId;
     this.date = formatter.format(date.getTime());
     this.title = title;
@@ -453,13 +461,13 @@ public abstract class AddEvent extends Panel {
       Button submitButton = new Button(SUBMIT_BUTTON_ID, new PropertyModel(this, "submitButtonText")) {
         @Override
         public void onSubmit() {
-          getBasePage().resetPanels();
+          basePage.resetPanels();
         }
       };
 
       if (eventId == -1) {
         submitButton.add((IValidatable<String> validatable) -> {
-          try (Connection conn = DriverManager.getConnection(DatabaseConnector.getDbUrl(), getDbProps())) {
+          try (Connection conn = DriverManager.getConnection(DatabaseConnector.getDbUrl(), dbProps)) {
             int newEventId = DatabaseConnector.insert(conn, DatabaseConnector.Table.EVENTS, new String[]{
               null,
               dateField.getInput(),
@@ -510,7 +518,7 @@ public abstract class AddEvent extends Panel {
         });
       } else {
         submitButton.add((IValidatable<String> validatable) -> {
-          try (Connection conn = DriverManager.getConnection(DatabaseConnector.getDbUrl(), getDbProps())) {
+          try (Connection conn = DriverManager.getConnection(DatabaseConnector.getDbUrl(), dbProps)) {
             DatabaseConnector.update(
                 conn,
                 DatabaseConnector.Table.EVENTS,
