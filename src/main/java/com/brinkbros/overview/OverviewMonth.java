@@ -4,11 +4,14 @@ import com.brinkbros.CalmanDate;
 import com.brinkbros.CalmanPeriod;
 import java.util.ArrayList;
 import java.util.Calendar;
+
 import static java.util.Calendar.DAY_OF_WEEK;
 import static java.util.Calendar.DAY_OF_WEEK_IN_MONTH;
 import static java.util.Calendar.DAY_OF_YEAR;
 import static java.util.Calendar.MONDAY;
 import static java.util.Calendar.SUNDAY;
+
+import com.brinkbros.CalmanUser;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +23,7 @@ public final class OverviewMonth extends CalmanPeriod {
   private final int month;
   private ArrayList<ArrayList<CalmanDate>> weeks;
 
-  public static OverviewMonth build(int year, int month, Properties dbProps) {
+  public static OverviewMonth build(int year, int month, Properties dbProps, CalmanUser currentUser) {
     Calendar monthCal = new GregorianCalendar(year, month, 1);
     monthCal.set(DAY_OF_WEEK, SUNDAY);
     monthCal.set(DAY_OF_WEEK_IN_MONTH, 1);
@@ -31,7 +34,7 @@ public final class OverviewMonth extends CalmanPeriod {
     ArrayList<CalmanDate> dateList = new ArrayList();
 
     for (int i = 0; i < 6; i++) {
-      weeks.add(OverviewWeek.build(monthCal, dbProps).asList());
+      weeks.add(OverviewWeek.build(monthCal, dbProps, currentUser).asList());
     }
     for (ArrayList<CalmanDate> week : weeks) {
       for (CalmanDate day : week) {
@@ -43,11 +46,11 @@ public final class OverviewMonth extends CalmanPeriod {
     Calendar firstDay = weeks.get(0).get(0);
     Calendar lastDay = weeks.get(weeks.size() - 1).get(6);
 
-    return new OverviewMonth(firstDay, lastDay, dateList, dateMap, dbProps, year, month, weeks);
+    return new OverviewMonth(firstDay, lastDay, dateList, dateMap, dbProps, currentUser, year, month, weeks);
   }
 
-  private OverviewMonth(Calendar firstDay, Calendar lastDay, ArrayList dateList, HashMap dateMap, Properties dbProps, int year, int month, ArrayList<ArrayList<CalmanDate>> weeks) {
-    super(firstDay, lastDay, dateList, dateMap, dbProps);
+  private OverviewMonth(Calendar firstDay, Calendar lastDay, ArrayList dateList, HashMap dateMap, Properties dbProps, CalmanUser currentUser, int year, int month, ArrayList<ArrayList<CalmanDate>> weeks) {
+    super(firstDay, lastDay, dateList, dateMap, dbProps, currentUser);
     this.year = year;
     this.month = month;
     this.weeks = weeks;

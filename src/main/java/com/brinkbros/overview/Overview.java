@@ -2,6 +2,7 @@ package com.brinkbros.overview;
 
 import com.brinkbros.CalmanDate;
 import com.brinkbros.CalmanEvent;
+import com.brinkbros.CalmanUser;
 import com.brinkbros.SidePanel;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -48,15 +49,17 @@ public class Overview extends Panel {
   
   private Properties dbProps;
   private SidePanel sidePanel;
+  private CalmanUser currentUser;
   private int month;
   private int year;
 
   private CalendarTable table;
 
-  public Overview(String id, Properties dbProps, SidePanel sidePanel) {
+  public Overview(String id, Properties dbProps, SidePanel sidePanel, CalmanUser currentUser) {
     super(id);
     this.dbProps = dbProps;
     this.sidePanel = sidePanel;
+    this.currentUser = currentUser;
     this.month = THIS_MONTH;
     this.year = THIS_YEAR;
     Label monthName = new Label(MONTHNAME_ID, new Model(getMonthName()));
@@ -64,7 +67,7 @@ public class Overview extends Panel {
     add(monthName);
 
     WebMarkupContainer tableContainer = new WebMarkupContainer(TABLE_CONTAINER_ID);
-    table = new CalendarTable(TABLE_ID, OverviewMonth.build(year, month, dbProps));
+    table = new CalendarTable(TABLE_ID, OverviewMonth.build(year, month, dbProps, currentUser));
     table.setOutputMarkupId(true);
     tableContainer.add(table);
     tableContainer.setOutputMarkupId(true);
@@ -80,7 +83,7 @@ public class Overview extends Panel {
           month--;
         }
         monthName.setDefaultModelObject(getMonthName());
-        table = new CalendarTable(TABLE_ID, OverviewMonth.build(year, month, dbProps));
+        table = new CalendarTable(TABLE_ID, OverviewMonth.build(year, month, dbProps, currentUser));
         tableContainer.replace(table);
         target.add(tableContainer);
         target.add(monthName);
@@ -109,7 +112,7 @@ public class Overview extends Panel {
         month = THIS_MONTH;
         year = THIS_YEAR;
         monthName.setDefaultModelObject(getMonthName());
-        table = new CalendarTable(TABLE_ID, OverviewMonth.build(year, month, dbProps));
+        table = new CalendarTable(TABLE_ID, OverviewMonth.build(year, month, dbProps, currentUser));
         tableContainer.replace(table);
         target.add(tableContainer);
         target.add(monthName);
@@ -141,7 +144,7 @@ public class Overview extends Panel {
           month++;
         }
         monthName.setDefaultModelObject(getMonthName());
-        table = new CalendarTable(TABLE_ID, OverviewMonth.build(year, month, dbProps));
+        table = new CalendarTable(TABLE_ID, OverviewMonth.build(year, month, dbProps, currentUser));
         tableContainer.replace(table);
         target.add(tableContainer);
         target.add(monthName);
@@ -228,9 +231,9 @@ public class Overview extends Panel {
                     @Override
                     public void onClick(AjaxRequestTarget target) {
                       try {
-                        sidePanel.changeDetails(target, event);
+                        sidePanel.changeDetails(target, event, currentUser);
                       } catch (SQLException ex) {
-                        sidePanel.changeDetails(target, ex.getMessage());
+                        sidePanel.changeDetails(target, ex);
                       }
                     }
 

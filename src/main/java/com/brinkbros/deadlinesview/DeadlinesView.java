@@ -30,7 +30,7 @@ public class DeadlinesView extends Panel {
   private static final String EVENT_LINK_ID = "eventLink";
   private static final String EVENT_ID = "event";
 
-  public DeadlinesView(String id, Properties dbProps, SidePanel sidePanel) {
+  public DeadlinesView(String id, Properties dbProps, SidePanel sidePanel, CalmanUser currentUser) {
     super(id);
 
     ArrayList<CalmanEvent> eventList = new ArrayList();
@@ -75,9 +75,9 @@ public class DeadlinesView extends Panel {
           @Override
           public void onClick(AjaxRequestTarget target) {
             try {
-              sidePanel.changeDetails(target, event);
-            } catch (SQLException e) {
-              sidePanel.changeDetails(target, e.getMessage());
+              sidePanel.changeDetails(target, event, currentUser);
+            } catch (SQLException ex) {
+              sidePanel.changeDetails(target, ex);
             }
           }
         };

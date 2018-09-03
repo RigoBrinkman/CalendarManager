@@ -193,10 +193,10 @@ public class SidePanel extends Panel {
 
   }
 
-  public void changeDetails(AjaxRequestTarget target, CalmanEvent event) throws SQLException {
+  public void changeDetails(AjaxRequestTarget target, CalmanEvent event, CalmanUser currentUser) throws SQLException {
     Connection conn = DriverManager.getConnection(DatabaseConnector.getDbUrl(), dbProps);
 
-    title.setDefaultModelObject(event.getTitle() + (event.isDeadlineViolated() ? "!!!" : ""));
+    title.setDefaultModelObject(event.getTitle());
     target.add(title);
 
     date.setDefaultModelObject(event.getCalendar().get(Calendar.DAY_OF_MONTH) + "/"
@@ -348,9 +348,9 @@ public class SidePanel extends Panel {
         @Override
         public void onClick(AjaxRequestTarget target) {
           try {
-            changeDetails(target, event.getParentEvent(conn).get());
+            changeDetails(target, event.getParentEvent(conn).get(), currentUser);
           } catch (SQLException ex) {
-            changeDetails(target, ex.getMessage());
+            changeDetails(target, ex);
           }
         }
       };
@@ -366,6 +366,14 @@ public class SidePanel extends Panel {
         parentLink.add(am);
       }
       parentCont.setVisible(true);
+      if(currentUser.getRole() < 2 
+          && currentUser != event.getParentEvent(conn).get().getMtAssignee() 
+          && currentUser != event.getParentEvent(conn).get().getTrekkerAssignee()
+          && !event.getParentEvent(conn).get().getAssignments(conn).contains(currentUser)){
+        parentLink.setEnabled(false);
+      }else{
+        parentLink.setEnabled(true);
+      }
     } else {
       parentCont.setVisible(false);
     }
@@ -378,9 +386,9 @@ public class SidePanel extends Panel {
         @Override
         public void onClick(AjaxRequestTarget target) {
           try {
-            changeDetails(target, de);
+            changeDetails(target, de, currentUser);
           } catch (SQLException ex) {
-            changeDetails(target, ex.getMessage());
+            changeDetails(target, ex);
           }
         }
       };
@@ -418,15 +426,15 @@ public class SidePanel extends Panel {
         super.renderHead(response);
       }
     };
-    editEvent.setOutputMarkupId(true);
+    editEvent.setOutputMarkupPlaceholderTag(true);
     editEventCont.addOrReplace(editEvent);
-    editEventCont.setVisible(true);
+    editEventCont.setVisible(currentUser.getRole() > 1);
     target.add(editEventCont);
 
   }
 
-  public void changeDetails(AjaxRequestTarget target, String newDetails) {
-    Label newLabel = new Label(DESCRIPTION_ID, newDetails);
+  public void changeDetails(AjaxRequestTarget target, Exception e) {
+    Label newLabel = new Label(DESCRIPTION_ID, e.getMessage());
     description.replaceWith(newLabel);
     newLabel.setOutputMarkupId(true);
     target.add(newLabel);

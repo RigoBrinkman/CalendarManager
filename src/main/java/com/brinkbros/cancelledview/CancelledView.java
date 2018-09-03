@@ -26,7 +26,7 @@ public class CancelledView extends Panel {
   private final Properties dbProps;
   private final SidePanel sidePanel;
 
-  public CancelledView(String id, Properties dbProps, SidePanel sidePanel) {
+  public CancelledView(String id, Properties dbProps, SidePanel sidePanel, CalmanUser currentUser) {
     super(id);
 
     this.dbProps = dbProps;
@@ -70,9 +70,9 @@ public class CancelledView extends Panel {
           @Override
           public void onClick(AjaxRequestTarget target) {
             try {
-              sidePanel.changeDetails(target, event);
+              sidePanel.changeDetails(target, event, currentUser);
             } catch (SQLException ex) {
-              sidePanel.changeDetails(target, ex.getMessage());
+              sidePanel.changeDetails(target, ex);
             }
           }
 

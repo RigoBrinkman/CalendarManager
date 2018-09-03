@@ -65,11 +65,37 @@ public class BasePage extends WebPage {
     }
 
     sidePanel = new SidePanel(SIDE_PANEL_ID, dbProps, this);
-    sidePanel.setOutputMarkupId(true);
     sidePanel.setOutputMarkupPlaceholderTag(true);
     add(sidePanel);
 
     container = new WebMarkupContainer(BUTTON_CONTAINER_ID);
+    container.setOutputMarkupPlaceholderTag(true);
+    add(container);
+    
+    options = new ListView(BUTTON_LIST_ID, new ArrayList()) {
+      @Override
+      protected void populateItem(ListItem item) {
+      }
+    };
+    options.setOutputMarkupId(true);
+    container.add(options);
+
+    //TODO build Cookie functionality to see if someone should already be logged in
+    
+    if (currentUser == null) {
+      startPage = PageType.LOGIN;
+    } else {
+      startPage = PageType.OVERVIEW;
+      showButtons();
+    }
+
+    activePanels = new HashMap();
+    activePanels.put(startPage, startPage.getPanel(dbProps, sidePanel, this, currentUser));
+    add(activePanels.get(startPage));
+
+  }
+
+  public void showButtons() {
 
     buttonMap = new HashMap();
 
@@ -82,7 +108,7 @@ public class BasePage extends WebPage {
           @Override
           public void onClick(AjaxRequestTarget target) {
             if (!activePanels.containsKey(buttonType)) {
-              activePanels.put(buttonType, buttonType.getPanel(dbProps, sidePanel, BasePage.this));
+              activePanels.put(buttonType, buttonType.getPanel(dbProps, sidePanel, BasePage.this, currentUser));
             }
             Panel newPanel = activePanels.get(buttonType);
             BasePage.this.get(PANEL_ID).replaceWith(newPanel);
@@ -122,26 +148,7 @@ public class BasePage extends WebPage {
     };
     options.setOutputMarkupPlaceholderTag(true);
     options.setVisible(currentUser != null);
-    container.add(options);
-    container.setOutputMarkupPlaceholderTag(true);
-    add(container);
-
-    //TODO build Cookie functionality to see if someone should already be logged in
-    
-    if (currentUser == null) {
-      startPage = PageType.LOGIN;
-    } else {
-      startPage = PageType.OVERVIEW;
-      showButtons();
-    }
-
-    activePanels = new HashMap();
-    activePanels.put(startPage, startPage.getPanel(dbProps, sidePanel, this));
-    add(activePanels.get(startPage));
-
-  }
-
-  public void showButtons() {
+    container.addOrReplace(options);
     //buttonMap.forEach((x, y) -> {y.setVisible(x.isButtonVisible(role));});
     options.setModelObject(options
         .getModelObject()
@@ -169,7 +176,7 @@ public class BasePage extends WebPage {
     this.sidePanel.replaceWith(newSidePanel);
     this.sidePanel = newSidePanel;
     this.activePanels.clear();
-    Panel newOverviewPanel = PageType.OVERVIEW.getPanel(dbProps, sidePanel, this);
+    Panel newOverviewPanel = PageType.OVERVIEW.getPanel(dbProps, sidePanel, this, currentUser);
     this.get(PANEL_ID).replaceWith(newOverviewPanel);
     this.activePanels.put(PageType.OVERVIEW, newOverviewPanel);
   }
@@ -178,7 +185,7 @@ public class BasePage extends WebPage {
 
     LOGIN("Inloggen", "loginButton", false) {
           @Override
-          protected Panel createPanel(String panelId, Properties dbProps, SidePanel sidePanel, BasePage basePage) {
+          protected Panel createPanel(String panelId, Properties dbProps, SidePanel sidePanel, BasePage basePage, CalmanUser currentUser) {
             return new LoginPanel(panelId, basePage);
           }
           @Override
@@ -188,8 +195,8 @@ public class BasePage extends WebPage {
         },
     OVERVIEW("Overzicht", "overviewButton", true) {
           @Override
-          public Panel createPanel(String panelId, Properties dbProps, SidePanel sidePanel, BasePage basePage) {
-            return new Overview(panelId, dbProps, sidePanel);
+          public Panel createPanel(String panelId, Properties dbProps, SidePanel sidePanel, BasePage basePage, CalmanUser currentUser) {
+            return new Overview(panelId, dbProps, sidePanel, currentUser);
           }
           @Override
           protected boolean isButtonVisible(int role) {
@@ -199,8 +206,8 @@ public class BasePage extends WebPage {
         },
     YEARVIEW("JaarOverzicht", "yearviewButton", true) {
           @Override
-          protected Panel createPanel(String panelId, Properties dbProps, SidePanel sidePanel, BasePage basePage) {
-            return new YearView(panelId, dbProps, sidePanel);
+          protected Panel createPanel(String panelId, Properties dbProps, SidePanel sidePanel, BasePage basePage, CalmanUser currentUser) {
+            return new YearView(panelId, dbProps, sidePanel, currentUser);
           }
           @Override
           protected boolean isButtonVisible(int role) {
@@ -209,7 +216,7 @@ public class BasePage extends WebPage {
         },
     ADDEVENT("Nieuw evenement", "addEventButton", true) {
           @Override
-          protected Panel createPanel(String panelId, Properties dbProps, SidePanel sidePanel, BasePage basePage) {
+          protected Panel createPanel(String panelId, Properties dbProps, SidePanel sidePanel, BasePage basePage, CalmanUser currentUser) {
             return new AddEvent(panelId, dbProps, sidePanel, basePage);
           }
           @Override
@@ -220,8 +227,8 @@ public class BasePage extends WebPage {
         },
     DEADLINES("Deadlines", "deadlinesButton", true) {
           @Override
-          protected Panel createPanel(String panelId, Properties dbProps, SidePanel sidePanel, BasePage basePage) {
-            return new DeadlinesView(panelId, dbProps, sidePanel);
+          protected Panel createPanel(String panelId, Properties dbProps, SidePanel sidePanel, BasePage basePage, CalmanUser currentUser) {
+            return new DeadlinesView(panelId, dbProps, sidePanel, currentUser);
           }
           @Override
           protected boolean isButtonVisible(int role) {
@@ -230,8 +237,8 @@ public class BasePage extends WebPage {
         },
     CANCELLEDVIEW("Geannuleerd", "cancelledButton", true) {
           @Override
-          protected Panel createPanel(String panelId, Properties dbProps, SidePanel sidePanel, BasePage basePage) {
-            return new CancelledView(panelId, dbProps, sidePanel);
+          protected Panel createPanel(String panelId, Properties dbProps, SidePanel sidePanel, BasePage basePage, CalmanUser currentUser) {
+            return new CancelledView(panelId, dbProps, sidePanel, currentUser);
           }
           @Override
           protected boolean isButtonVisible(int role) {
@@ -240,7 +247,7 @@ public class BasePage extends WebPage {
         },
     SETTINGS("Instellingen", "settingsButton", true) {
           @Override
-          protected Panel createPanel(String panelId, Properties dbProps, SidePanel sidePanel, BasePage basePage) {
+          protected Panel createPanel(String panelId, Properties dbProps, SidePanel sidePanel, BasePage basePage, CalmanUser currentUser) {
             return new Settings(panelId, dbProps);
           }
           @Override
@@ -253,7 +260,7 @@ public class BasePage extends WebPage {
     private final String name;
     private final boolean isSidePanelVisible;
 
-    protected abstract Panel createPanel(String panelId, Properties dbProps, SidePanel sidePanel, BasePage basePage);
+    protected abstract Panel createPanel(String panelId, Properties dbProps, SidePanel sidePanel, BasePage basePage, CalmanUser currentUser);
     protected abstract boolean isButtonVisible(int role);
 
     private PageType(String name, String id, boolean isSidePanelVisible) {
@@ -272,8 +279,8 @@ public class BasePage extends WebPage {
       return javascript.toString();
     }
 
-    public Panel getPanel(Properties dbProps, SidePanel sidePanel, BasePage basePage) {
-      Panel panel = createPanel(PANEL_ID, dbProps, sidePanel, basePage);
+    public Panel getPanel(Properties dbProps, SidePanel sidePanel, BasePage basePage, CalmanUser currentUser) {
+      Panel panel = createPanel(PANEL_ID, dbProps, sidePanel, basePage, currentUser);
       panel.setOutputMarkupId(true);
       return panel;
     }

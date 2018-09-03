@@ -2,6 +2,7 @@ package com.brinkbros.yearview;
 
 import com.brinkbros.CalmanDate;
 import com.brinkbros.CalmanEvent;
+import com.brinkbros.CalmanUser;
 import com.brinkbros.SidePanel;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ public class YearView extends Panel {
   private YearviewYear yvYear;
   private DataView months;
 
-  public YearView(String id, Properties dbProps, SidePanel sidePanel) {
+  public YearView(String id, Properties dbProps, SidePanel sidePanel, CalmanUser currentUser) {
     super(id);
     this.dbProps = dbProps;
     this.sidePanel = sidePanel;
@@ -60,9 +61,9 @@ public class YearView extends Panel {
     tableContainer.setOutputMarkupId(true);
     add(tableContainer);
     {
-      yvYear = YearviewYear.build(year, dbProps);
+      yvYear = YearviewYear.build(year, dbProps, currentUser);
 
-      months = getMonthsDataView(yvYear);
+      months = getMonthsDataView(yvYear, currentUser);
       months.setOutputMarkupId(true);
       tableContainer.add(months);
     }
@@ -71,8 +72,8 @@ public class YearView extends Panel {
       public void onClick(AjaxRequestTarget target) {
         year--;
         yearLabel.setDefaultModelObject(String.valueOf(year));
-        yvYear = YearviewYear.build(year, dbProps);
-        tableContainer.get(MONTH_TABLE_ID).replaceWith(getMonthsDataView(yvYear));
+        yvYear = YearviewYear.build(year, dbProps, currentUser);
+        tableContainer.get(MONTH_TABLE_ID).replaceWith(getMonthsDataView(yvYear, currentUser));
         target.add(tableContainer);
         target.add(yearLabel);
       }
@@ -98,8 +99,8 @@ public class YearView extends Panel {
       public void onClick(AjaxRequestTarget target) {
         year = Calendar.getInstance().get(Calendar.YEAR);
         yearLabel.setDefaultModelObject(String.valueOf(year));
-        yvYear = YearviewYear.build(year, dbProps);
-        tableContainer.get(MONTH_TABLE_ID).replaceWith(getMonthsDataView(yvYear));
+        yvYear = YearviewYear.build(year, dbProps, currentUser);
+        tableContainer.get(MONTH_TABLE_ID).replaceWith(getMonthsDataView(yvYear, currentUser));
         target.add(tableContainer);
         target.add(yearLabel);
       }
@@ -125,8 +126,8 @@ public class YearView extends Panel {
       public void onClick(AjaxRequestTarget target) {
         year++;
         yearLabel.setDefaultModelObject(String.valueOf(year));
-        yvYear = YearviewYear.build(year, dbProps);
-        tableContainer.get(MONTH_TABLE_ID).replaceWith(getMonthsDataView(yvYear));
+        yvYear = YearviewYear.build(year, dbProps, currentUser);
+        tableContainer.get(MONTH_TABLE_ID).replaceWith(getMonthsDataView(yvYear, currentUser));
         target.add(tableContainer);
         target.add(yearLabel);
       }
@@ -149,7 +150,7 @@ public class YearView extends Panel {
 
   }
 
-  private DataView getMonthsDataView(YearviewYear yvYear) {
+  private DataView getMonthsDataView(YearviewYear yvYear, CalmanUser currentUser) {
     return new DataView<ArrayList<CalmanDate>>(MONTH_TABLE_ID, new ListDataProvider(yvYear.getMonths())) {
       @Override
       protected void populateItem(Item<ArrayList<CalmanDate>> item) {
@@ -168,9 +169,9 @@ public class YearView extends Panel {
                   @Override
                   public void onClick(AjaxRequestTarget target) {
                     try {
-                      sidePanel.changeDetails(target, event);
+                      sidePanel.changeDetails(target, event, currentUser);
                     } catch (SQLException ex) {
-                      throw new RuntimeException(ex.getMessage());
+                      sidePanel.changeDetails(target, ex);
                     }
                   }
                 };

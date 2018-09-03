@@ -2,6 +2,7 @@ package com.brinkbros.yearview;
 
 import com.brinkbros.CalmanDate;
 import com.brinkbros.CalmanPeriod;
+import com.brinkbros.CalmanUser;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -10,7 +11,7 @@ import java.util.Properties;
 
 public class YearviewYear extends CalmanPeriod {
 
-  public static YearviewYear build(int year, Properties dbProps) {
+  public static YearviewYear build(int year, Properties dbProps, CalmanUser currentUser) {
     Calendar firstDay = new GregorianCalendar(year, 0, 1);
     Calendar lastDay = new GregorianCalendar(year, 11, 31);
     ArrayList<CalmanDate> dateList = new ArrayList();
@@ -30,7 +31,7 @@ public class YearviewYear extends CalmanPeriod {
       rollCal.roll(Calendar.MONTH, true);
     }
 
-    return new YearviewYear(firstDay, lastDay, dateList, dateMap, dbProps, year, months);
+    return new YearviewYear(firstDay, lastDay, dateList, dateMap, dbProps, currentUser, year, months);
 
   }
 
@@ -68,8 +69,8 @@ public class YearviewYear extends CalmanPeriod {
   private final int year;
   private final ArrayList<ArrayList<CalmanDate>> months;
 
-  private YearviewYear(Calendar firstDay, Calendar lastDay, ArrayList dateList, HashMap dateMap, Properties dbProps, int year, ArrayList<ArrayList<CalmanDate>> months) {
-    super(firstDay, lastDay, dateList, dateMap, dbProps);
+  private YearviewYear(Calendar firstDay, Calendar lastDay, ArrayList dateList, HashMap dateMap, Properties dbProps, CalmanUser currentUser, int year, ArrayList<ArrayList<CalmanDate>> months) {
+    super(firstDay, lastDay, dateList, dateMap, dbProps, currentUser);
     this.year = year;
     this.months = months;
     addEvents();
