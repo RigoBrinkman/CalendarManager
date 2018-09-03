@@ -19,10 +19,10 @@ a { text-decoration: none; color: #000000; }
 #main-view { background-color: #FFFFFF; flex: 7; padding: 0; margin: 0; overflow: auto;}
 #main-top { text-align: center; }
 #main-top span { display: block; font: bold 18px/1.1 Verdana, Sans-Serif; }
-#detail-view { background-color: #EEEEEE; flex: 3; min-width: 400px; border-left: 2px solid black; }
+#detail-view { background-color: #EEEEEE; flex: 3; min-width: 400px; border-left: 2px solid black; overflow: auto; padding: 20px;}
 #detail-view span { display: block; }
 #detail-view a span { display: inline-block;}
-#mainTopName { margin: 0 10px 0 0; }
+#mainTopName { margin: 10px; }
 
 /*
 	TYPOGRAPHY
@@ -63,3 +63,4 @@ h2 { font: bold 16px/1.1 Verdana, Sans-Serif; color: #000000; }
 .form-block { display: block; }
 .form-title { font: bold 16px/1.1 Verdana, Sans-Serif; }
 .form-inline-block { display: inline-block; }
+.addEventContainer { margin: 0px 10px 10px 20px ; vertical-align: top; }

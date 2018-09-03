@@ -9,7 +9,6 @@
             </a>
         </span>
         <br>
-        <span>Datum: </span>
         <span wicket:id="date"></span>
         <span wicket:id="conAh"></span>
         <span wicket:id="conDi"></span>
@@ -20,16 +19,18 @@
                 <!--<span wicket:id="assignmentType"></span>-->
             </span>
         </span>
-        <span>Beschrijving: </span>
         <span wicket:id="description"></span>
         <span></span>
         <!--<span wicket:id="type"></span>-->
-        <span>Status: </span>
         <span wicket:id="status"></span>
-        <span wicket:id="editEventContainer">
+        <form wicket:id="editStatusForm">
+            <select wicket:id="statusOptions"></select>
+            <input type="button" wicket:id="editStatus"/>
+            <input type="submit" wicket:id="editStatusSubmit">
+        </form>
+        <span wicket:id="editEventCont">
             <input type="button" wicket:id="editEvent"/>
-        </span>
-        <br>
+        </span><br>
         <span wicket:id="subevent">
             <a wicket:id="subLink" class="calendarItem">
                 <span wicket:id="subTitle"></span>
