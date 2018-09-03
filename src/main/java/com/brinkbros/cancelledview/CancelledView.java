@@ -10,9 +10,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.basic.Label;
@@ -40,7 +37,8 @@ public class CancelledView extends Panel {
         ResultSet rslts = conn.createStatement().executeQuery("SELECT * FROM PF_EVENTS l "
             + "LEFT JOIN PF_OPT_DATES r "
             + "ON l.event_id = r.event_id "
-            + "WHERE l.status = 307")) {
+            + "WHERE l.status = 307 "
+            + "AND l.end_date > DATE_SUB(NOW(), INTERVAL 2 MONTH)")) {
       while (rslts.next()) {
         events.add(new CalmanEvent(
             rslts.getInt(1),
