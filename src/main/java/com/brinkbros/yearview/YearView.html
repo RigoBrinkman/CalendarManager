@@ -1,0 +1,25 @@
+<wicket:panel>
+    <div id="main-top">
+        <span wicket:id="yearLabel" class="mainTopName"></span>
+        <input class="monButton" type="button" wicket:id="previous">
+        <input class="monButton" type="button" wicket:id="gotoNow">
+        <input class="monButton" type="button" wicket:id="next">
+    </div>
+    <div wicket:id="tableContainer" class="yearTabContainer">
+        <table wicket:id="monthTable" class="yearCal">
+            <tr><th colspan="2"><span wicket:id="monthName"></span></th></tr>
+            <tr wicket:id="dayRow">
+                <td>
+                    <span wicket:id="dayNo"></span>
+                </td>
+                <td class="eventCol">
+                    <span wicket:id="events">
+                        <a wicket:id="eventLink">
+                            <span wicket:id="eventLabel" class="calendarItem"></span>
+                        </a>
+                    </span>
+                </td>
+            </tr>
+        </table>
+    </div>
+</wicket:panel>

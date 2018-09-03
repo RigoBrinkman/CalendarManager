@@ -5,11 +5,15 @@
         <wicket:link>
             <link rel="stylesheet" type="text/css" href="style.css"/>
         </wicket:link>
+        <wicket:link>
+            <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+        </wicket:link>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
     </wicket:head>
     <body>
         <div wicket:id="buttonContainer">
             <span wicket:id="buttonList">
-                <input type="button" wicket:id="buttonOption"/>
+                <input type="button" wicket:id="buttonOption" class="calButton"/>
             </span>
         </div>
         <div class="wrapper" id="page-wrap">

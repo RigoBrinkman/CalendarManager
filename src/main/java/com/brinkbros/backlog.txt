@@ -1,0 +1,24 @@
+assignments: SidePanel, DateEvent, AddEvent;
+deadlines: AddEvent, SidePanel, DateEvent;
+generic DateRange class: ODMonth, ODWeek, YVMonth, YVYear, OverviewDate;
+add YearView;
+! add YearView ! remove Events: Events, Events.html, BasePage#PageType; 
+subevents database: dateEvent#getSubevents;
+sidepanel setter methods;
+! sidepanel setter methods ! sidepanel#changedetails;
+! sidepanel setter methods ! addevents description sidepanel;
+clickedButtons;
+make AddEvent form recursive;
+URLs for different panels?;
+kleur in sidepanel;
+edit deadlines: AddEvent;
+multiple assignments: AddEvent;
+! multiple assignments ! edit multiple assignments: AddEvent;
+
+AjaxFormSubmitBehavior: AddEvent;
+
+wicket Streams;
+Deployment;
+Outlook;
+annotations: DatabaseConnector#Table;
+javadoc;

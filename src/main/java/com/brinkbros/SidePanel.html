@@ -1,3 +1,42 @@
 <wicket:panel>
-    <span wicket:id="top"></span>
+    <div class="detailContainer">
+        <h1><span wicket:id="title"></span></h1>
+        <span wicket:id="parentevent">
+            <a wicket:id="parentLink" class="calendarItem">
+                <span wicket:id="parentTitle"></span>
+                <span wicket:id="parentDescription"></span>
+                <span wicket:id="parentDate"></span>
+            </a>
+        </span>
+        <br>
+        <span wicket:id="date"></span>
+        <span wicket:id="conAh"></span>
+        <span wicket:id="conDi"></span>
+        <span wicket:id="def"></span>
+        <span wicket:id="assignmentCont">
+            <span wicket:id="assignment">
+                <span wicket:id="assignmentName"></span>
+                <!--<span wicket:id="assignmentType"></span>-->
+            </span>
+        </span>
+        <span wicket:id="description"></span>
+        <span></span>
+        <!--<span wicket:id="type"></span>-->
+        <span wicket:id="status"></span>
+        <form wicket:id="editStatusForm">
+            <select wicket:id="statusOptions"></select>
+            <input type="button" wicket:id="editStatus"/>
+            <input type="submit" wicket:id="editStatusSubmit">
+        </form>
+        <span wicket:id="editEventCont">
+            <input type="button" wicket:id="editEvent"/>
+        </span><br>
+        <span wicket:id="subevent">
+            <a wicket:id="subLink" class="calendarItem">
+                <span wicket:id="subTitle"></span>
+                <span wicket:id="subDescription"></span>
+                <span wicket:id="subDate"></span>
+            </a>
+        </span>
+    </div>
 </wicket:panel>
