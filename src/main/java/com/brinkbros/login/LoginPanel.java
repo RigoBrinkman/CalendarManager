@@ -65,11 +65,18 @@ public class LoginPanel extends Panel {
               + "' AND password = MD5('" + passwordField.getInput() + "')")) {
         if(rslts.next()){
           basePage.setCurrentUser(CalmanUser.getUser(rslts.getInt(1)));
-        }else{
+        }else if (conn.createStatement().executeQuery("SELECT * FROM PF_USERS WHERE mail = '" + usernameField.getInput() + "'").next()){
           validatable.error(new IValidationError() {
             @Override
             public Serializable getErrorMessage(IErrorMessageSource messageSource) {
-              return "Incorrecte login gegevens";
+              return "Incorrect wachtwoord";
+            }
+          });
+        }else{
+                    validatable.error(new IValidationError() {
+            @Override
+            public Serializable getErrorMessage(IErrorMessageSource messageSource) {
+              return "Incorrect mailadres";
             }
           });
         }
