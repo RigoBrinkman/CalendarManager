@@ -148,10 +148,6 @@ public final class CalmanEvent implements Serializable {
     return id;
   }
 
-  public String getName() {
-    return title;
-  }
-
   public Optional<CalmanEvent> getParentEvent(Connection conn) throws SQLException {
     if (!checkedForParentEvent) {
       try (Statement stmnt = conn.createStatement();

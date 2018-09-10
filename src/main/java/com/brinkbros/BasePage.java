@@ -12,6 +12,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Properties;
@@ -23,10 +24,12 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.markup.html.WebPage;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.Model;
 import settings.Settings;
 
 public class BasePage extends WebPage {
@@ -38,6 +41,10 @@ public class BasePage extends WebPage {
   private static final String BUTTON_LIST_ID = "buttonList";
   private static final String BUTTON_CONTAINER_ID = "buttonContainer";
   private static final String BUTTON_ID = "buttonOption";
+  private static final String USER_INFO_ID = "userInfo";
+  private static final String DATE_ID = "date";
+  private static final String ROLE_ID = "role";
+  private static final String NAME_ID = "name";
 
   public HashMap<PageType, Panel> activePanels;
   private PageType startPage;
@@ -49,6 +56,7 @@ public class BasePage extends WebPage {
   private ListView<PageType> options;
   private AjaxLink clickedButton;
   private WebMarkupContainer container;
+  private WebMarkupContainer userInfo;
   private CalmanUser currentUser;
 
   public BasePage(final PageParameters parameters) {
@@ -72,6 +80,13 @@ public class BasePage extends WebPage {
     container.setOutputMarkupPlaceholderTag(true);
     add(container);
     
+    userInfo = new WebMarkupContainer(USER_INFO_ID);
+    userInfo.add(new Label(DATE_ID));
+    userInfo.add(new Label(ROLE_ID));
+    userInfo.add(new Label(NAME_ID));
+    userInfo.setOutputMarkupId(true);
+    container.add(userInfo);
+
     options = new ListView(BUTTON_LIST_ID, new ArrayList()) {
       @Override
       protected void populateItem(ListItem item) {
@@ -81,7 +96,6 @@ public class BasePage extends WebPage {
     container.add(options);
 
     //TODO build Cookie functionality to see if someone should already be logged in
-    
     if (currentUser == null) {
       startPage = PageType.LOGIN;
     } else {
@@ -156,6 +170,43 @@ public class BasePage extends WebPage {
         .filter(pt -> pt.isButtonVisible(currentUser.getRole()))
         .collect(Collectors.toCollection(ArrayList<PageType>::new)));
     options.setVisible(true);
+
+    
+    WebMarkupContainer userInfo = new WebMarkupContainer(USER_INFO_ID);
+    userInfo.setOutputMarkupId(true);
+    container.replace(userInfo);
+    
+    Calendar today = Calendar.getInstance();
+    
+    Label dateLabel = new Label(DATE_ID, new Model(
+        today.get(Calendar.DAY_OF_MONTH)
+        + "/"
+        + today.get(Calendar.MONTH)
+        + "/"
+        + today.get(Calendar.YEAR)));
+    dateLabel.setOutputMarkupId(true);
+    userInfo.add(dateLabel);
+    
+    Label roleLabel;
+    switch(currentUser.getRole()){
+      case 0:
+        roleLabel = new Label(ROLE_ID, new Model("Gebruiker"));
+        break;
+      case 1:
+        roleLabel = new Label(ROLE_ID, new Model("Management"));
+        break;
+      case 2:
+        roleLabel = new Label(ROLE_ID, new Model("Administrator"));
+        break;
+      default:
+        roleLabel = new Label(ROLE_ID, "ONBEKENDE ROL");
+    }
+    roleLabel.setOutputMarkupId(true);
+    userInfo.add(roleLabel);
+    
+    Label nameLabel = new Label(NAME_ID, new Model(currentUser.getName()));
+    nameLabel.setOutputMarkupId(true);
+    userInfo.add(nameLabel);
   }
 
   public CalmanUser getCurrentUser() {
@@ -255,7 +306,19 @@ public class BasePage extends WebPage {
             return true;
           }
 
-        };
+        },
+    LOGOUT("Uitloggen", "logoutButton", true) {
+      @Override
+      protected Panel createPanel(String panelId, Properties dbProps, SidePanel sidePanel, BasePage basePage, CalmanUser currentUser) {
+        basePage.setResponsePage(BasePage.class);
+        basePage.getSession().invalidate();
+        return null;
+      }
+      @Override
+      protected boolean isButtonVisible(int role) {
+        return true;
+      }
+    };
     private final String id;
     private final String name;
     private final boolean isSidePanelVisible;

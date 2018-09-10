@@ -176,7 +176,10 @@ public class YearView extends Panel {
                   }
                 };
                 item.add(eventLink);
-                Label label = new Label(EVENT_ID, event.getTitle());
+                Label label
+                    = event.getTitle().length() > 20
+                        ? new Label(EVENT_ID, event.getTitle().substring(0, 17) + "...")
+                        : new Label(EVENT_ID, event.getTitle());
                 event.getAttributeModifiers().stream().forEach(am -> label.add(am));
                 eventLink.add(label);
 

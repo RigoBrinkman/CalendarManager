@@ -103,11 +103,10 @@ public class AddEvent extends Panel {
     assignmentTypesList.add("Overig");
   }
 
-
   private Properties dbProps;
   private SidePanel sidePanel;
   private BasePage basePage;
-  
+
   private RepeatingView subEvents;
   private List<SubeventForm> subeventList;
   private ArrayList<CalmanUser> userList;
@@ -504,7 +503,9 @@ public class AddEvent extends Panel {
                 String.valueOf(sef.getType()),
                 String.valueOf(sef.getStatus()),
                 String.valueOf(newEventId),
-                String.valueOf(CalmanUser.getUser(usernameList.get(Integer.parseInt(mtAssignmentChoice.getInput()))).getUserId())});
+                String.valueOf(CalmanUser.getUser(usernameList.get(Integer.parseInt(sef.getMtAssignment()))).getUserId()),
+                String.valueOf(CalmanUser.getUser(usernameList.get(Integer.parseInt(sef.getTrekkerAssignment()))).getUserId())
+              });
               for (DropDownChoice ass : sef.assignmentList) {
                 DatabaseConnector.insert(conn, DatabaseConnector.Table.ASSIGNMENTS, new String[]{
                   null,
@@ -567,7 +568,9 @@ public class AddEvent extends Panel {
                 String.valueOf(sef.getType()),
                 String.valueOf(sef.getStatus()),
                 String.valueOf(eventId),
-                String.valueOf(CalmanUser.getUser(usernameList.get(Integer.parseInt(mtAssignmentChoice.getInput()))).getUserId())});
+                String.valueOf(CalmanUser.getUser(usernameList.get(Integer.parseInt(sef.getMtAssignment()))).getUserId()),
+                String.valueOf(CalmanUser.getUser(usernameList.get(Integer.parseInt(sef.getTrekkerAssignment()))).getUserId())
+              });
               for (DropDownChoice ass : sef.assignmentList) {
                 DatabaseConnector.insert(conn, DatabaseConnector.Table.ASSIGNMENTS, new String[]{
                   null,
@@ -597,6 +600,8 @@ public class AddEvent extends Panel {
     private static final String SUB_CON_DI_LABEL_ID = "subConDiLabel";
     private static final String SUB_DEF_DATE_ID = "subDefDate";
     private static final String SUB_DEF_LABEL_ID = "subDefLabel";
+    private static final String SUB_MT_ASSIGNEE_ID = "subMtAssignee";
+    private static final String SUB_TREKKER_ASSIGNEE_ID = "subTrekkerAssignee";
     private static final String SUB_ASSIGNMENT_CONTAINER_ID = "subAssigneesContainer";
     private static final String SUB_ASSIGNMENT_ID = "subAssignment";
     private static final String SUB_ASSIGNMENT_NAME_ID = "subAssignmentName";
@@ -614,6 +619,8 @@ public class AddEvent extends Panel {
     private TextField subConDiDate;
     private TextField subDefDate;
     private RepeatingView assignmentRepeater;
+    private DropDownChoice subMtAssignee;
+    private DropDownChoice subTrekkerAssignee;
     private DropDownChoice assignment;
     private DropDownChoice category;
     private DropDownChoice type;
@@ -697,6 +704,26 @@ public class AddEvent extends Panel {
       descriptionField.setOutputMarkupId(true);
       add(descriptionField);
 
+      subMtAssignee = new DropDownChoice(SUB_MT_ASSIGNEE_ID, new Model(usernameList.get(0)), usernameList) {
+        @Override
+        public void renderHead(IHeaderResponse response) {
+          response.render(OnDomReadyHeaderItem.forScript("$('#" + getMarkupId() + "').select2();"));
+          super.renderHead(response);
+        }
+      };
+      subMtAssignee.setOutputMarkupId(true);
+      add(subMtAssignee);
+
+      subTrekkerAssignee = new DropDownChoice(SUB_TREKKER_ASSIGNEE_ID, new Model(usernameList.get(0)), usernameList) {
+        @Override
+        public void renderHead(IHeaderResponse response) {
+          response.render(OnDomReadyHeaderItem.forScript("$('#" + getMarkupId() + "').select2();"));
+          super.renderHead(response);
+        }
+      };
+      subTrekkerAssignee.setOutputMarkupId(true);
+      add(subTrekkerAssignee);
+
       assignmentList = new ArrayList();
       assignmentTypeList = new ArrayList();
 
@@ -707,25 +734,7 @@ public class AddEvent extends Panel {
       assignmentRepeater = new RepeatingView(SUB_ASSIGNMENT_ID);
       assignmentRepeater.setOutputMarkupId(true);
       assignmentCont.add(assignmentRepeater);
-      {
-        WebMarkupContainer singleAssignment = new WebMarkupContainer(assignmentRepeater.newChildId());
-        singleAssignment.setOutputMarkupId(true);
-        assignmentRepeater.add(singleAssignment);
-
-        assignment = new DropDownChoice(SUB_ASSIGNMENT_NAME_ID, new Model(usernameList.get(0)), usernameList) {
-          @Override
-          public void renderHead(IHeaderResponse response) {
-            response.render(OnDomReadyHeaderItem.forScript("$('#" + getMarkupId() + "').select2();"));
-            super.renderHead(response);
-          }
-        };
-        assignment.setOutputMarkupId(true);
-        singleAssignment.add(assignment);
-
-        assignmentList.add(assignment);
-      }
       AjaxLink addAssignment = new AjaxLink(SUB_ADD_ASSIGNMENT_ID) {
-
         @Override
         public void onClick(AjaxRequestTarget target) {
           WebMarkupContainer singleAssignment = new WebMarkupContainer(assignmentRepeater.newChildId());
@@ -806,8 +815,12 @@ public class AddEvent extends Panel {
       return subDeadlineCheck.getModelObject() ? subDefDate.getInput() : null;
     }
 
-    private String getAssignment() {
-      return assignment.getInput();
+    public String getMtAssignment() {
+      return subMtAssignee.getInput();
+    }
+
+    public String getTrekkerAssignment() {
+      return subTrekkerAssignee.getInput();
     }
 
     public int getCategory() {

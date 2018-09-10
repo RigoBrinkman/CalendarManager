@@ -46,7 +46,7 @@ public class Overview extends Panel {
     THIS_MONTH = cal.get(Calendar.MONTH);
     THIS_YEAR = cal.get(Calendar.YEAR);
   }
-  
+
   private Properties dbProps;
   private SidePanel sidePanel;
   private CalmanUser currentUser;
@@ -238,11 +238,13 @@ public class Overview extends Panel {
                     }
 
                   };
-                  Label label = new Label(EVENT_ID, event.getName());
-                  for(AttributeModifier am : event.getAttributeModifiers())
-                  {
+                  Label label
+                  = event.getTitle().length() > 20
+                      ? new Label(EVENT_ID, event.getTitle().substring(0, 17) + "...")
+                      : new Label(EVENT_ID, event.getTitle());
+                  event.getAttributeModifiers().stream().forEach((am) -> {
                     label.add(am);
-                  }
+                  });
                   link.add(label);
                   item.add(link);
                 }

@@ -1,6 +1,7 @@
 package com.brinkbros.login;
 
 import com.brinkbros.BasePage;
+import com.brinkbros.CalendarManager;
 import com.brinkbros.CalmanUser;
 import com.brinkbros.DatabaseConnector;
 import java.io.Serializable;
@@ -18,6 +19,7 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.validation.IErrorMessageSource;
 import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidationError;
@@ -59,12 +61,13 @@ public class LoginPanel extends Panel {
     loginSubmit.setOutputMarkupId(true);
     loginSubmit.add((IValidatable<String> validatable) -> {
       try (Connection conn = DriverManager.getConnection(DatabaseConnector.getDbUrl(), basePage.getDbProps());
-          Statement stmnt = conn.createStatement();
+          Statement stmnt = conn.createStatement(); 
           ResultSet rslts = stmnt.executeQuery("SELECT * FROM PF_USERS "
               + "WHERE mail = '" + usernameField.getInput()
-              + "' AND password = MD5('" + passwordField.getInput() + "')")) {
+              + "' AND password = SHA2('" + passwordField.getInput() + "', 512)")) {
         if(rslts.next()){
           basePage.setCurrentUser(CalmanUser.getUser(rslts.getInt(1)));
+          basePage.getCurrentUser();
         }else if (conn.createStatement().executeQuery("SELECT * FROM PF_USERS WHERE mail = '" + usernameField.getInput() + "'").next()){
           validatable.error(new IValidationError() {
             @Override

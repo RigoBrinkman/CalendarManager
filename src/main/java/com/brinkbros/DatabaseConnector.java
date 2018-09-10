@@ -19,6 +19,8 @@ import java.util.Properties;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.model.Model;
 
 public class DatabaseConnector {
   @Documented
@@ -127,19 +129,11 @@ public class DatabaseConnector {
     props.put("password", "PFSPO2018test");
     props.put("useLegacyDatetimeCode", "false");
     props.put("serverTimezone", "UTC");
+    
 
-    try (Connection conn = DriverManager.getConnection(DatabaseConnector.getDbUrl(), props);
-        ResultSet rslts = conn.createStatement().executeQuery(
-            "SELECT * FROM PF_EVENTS l "
-            + "LEFT JOIN PF_OPT_DATES r "
-                + "ON l.event_id = r.event_id "
-                + "WHERE (l.status < 305 AND r.date_ah < CURDATE())")) {
-      while (rslts.next()) {
-        for (int i = 1; i <= 15; i++) {
-          System.out.print(rslts.getString(i) + " ");
-        }
-        System.out.println();
-      }
+    try (Connection conn = DriverManager.getConnection(DatabaseConnector.getDbUrl(), props)){
+      Statement stmnt = conn.createStatement();
+      stmnt.executeUpdate("UPDATE PF_USERS SET password = sha2(name_full, 512)");
 
     } catch (SQLException e) {
       e.printStackTrace();

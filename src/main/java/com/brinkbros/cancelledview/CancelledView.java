@@ -77,7 +77,7 @@ public class CancelledView extends Panel {
           }
 
         };
-        Label label = new Label(EVENT_ID, event.getName());
+        Label label = new Label(EVENT_ID, event.getTitle());
         event.getAttributeModifiers().stream().forEach((am) -> {
           label.add(am);
         });
