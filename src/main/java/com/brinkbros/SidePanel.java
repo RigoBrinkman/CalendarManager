@@ -16,6 +16,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
@@ -57,7 +58,6 @@ public class SidePanel extends Panel {
 
   private static final AttributeModifier RED_TEXT_MODIFIER = new AttributeModifier("style", new Model("color: red;"));
   private static final AttributeModifier BLACK_TEXT_MODIFIER = new AttributeModifier("style", new Model("color: black;"));
-
 
   Properties dbProps;
   BasePage basePage;
@@ -202,9 +202,9 @@ public class SidePanel extends Panel {
     date.setDefaultModelObject(event.getCalendar().get(Calendar.DAY_OF_MONTH) + "/"
         + (event.getCalendar().get(Calendar.MONTH) + 1) + "/"
         + event.getCalendar().get(Calendar.YEAR));
-    if(event.getStatusInt() < 306 && event.getCalendar().before(Calendar.getInstance())){
+    if (event.getStatusInt() < 306 && event.getCalendar().before(Calendar.getInstance())) {
       date.add(RED_TEXT_MODIFIER);
-    }else{
+    } else {
       date.add(BLACK_TEXT_MODIFIER);
     }
     target.add(date);
@@ -226,7 +226,10 @@ public class SidePanel extends Panel {
         singleAssignment.setOutputMarkupId(true);
         assignments.add(singleAssignment);
 
-        singleAssignment.add(new Label(ASSIGNMENT_NAME_ID, new Model(event.getAssignments().get(i).getName())));
+        singleAssignment.add(
+            i == 0
+                ? new MultiLineLabel(ASSIGNMENT_NAME_ID, new Model("Overige assignees:\n" + event.getAssignments().get(i).getName()))
+                : new Label(ASSIGNMENT_NAME_ID, new Model(event.getAssignments().get(i).getName())));
         //singleAssignment.add(new Label(ASSIGNMENT_TYPE_ID, new Model(event.getAssignments().get(i).getTypeString())));
       }
     }
@@ -251,9 +254,9 @@ public class SidePanel extends Panel {
           + event.getDeadlines().get()[1].get(Calendar.DAY_OF_MONTH) + "/"
           + (event.getDeadlines().get()[1].get(Calendar.MONTH) + 1) + "/"
           + event.getDeadlines().get()[1].get(Calendar.YEAR));
-      if(event.getStatusInt() < 303 && event.getDeadlines().get()[1].before(Calendar.getInstance())){
+      if (event.getStatusInt() < 303 && event.getDeadlines().get()[1].before(Calendar.getInstance())) {
         conDi.add(RED_TEXT_MODIFIER);
-      }else{
+      } else {
         conDi.add(BLACK_TEXT_MODIFIER);
       }
       def.setDefaultModelObject(
@@ -261,9 +264,9 @@ public class SidePanel extends Panel {
           + event.getDeadlines().get()[2].get(Calendar.DAY_OF_MONTH) + "/"
           + (event.getDeadlines().get()[2].get(Calendar.MONTH) + 1) + "/"
           + event.getDeadlines().get()[2].get(Calendar.YEAR));
-      if(event.getStatusInt() < 304 && event.getDeadlines().get()[2].before(Calendar.getInstance())){
+      if (event.getStatusInt() < 304 && event.getDeadlines().get()[2].before(Calendar.getInstance())) {
         def.add(RED_TEXT_MODIFIER);
-      }else{
+      } else {
         def.add(BLACK_TEXT_MODIFIER);
       }
     } else {
@@ -366,12 +369,12 @@ public class SidePanel extends Panel {
         parentLink.add(am);
       }
       parentCont.setVisible(true);
-      if(currentUser.getRole() < 2 
-          && currentUser != event.getParentEvent(conn).get().getMtAssignee() 
+      if (currentUser.getRole() < 2
+          && currentUser != event.getParentEvent(conn).get().getMtAssignee()
           && currentUser != event.getParentEvent(conn).get().getTrekkerAssignee()
-          && !event.getParentEvent(conn).get().getAssignments(conn).contains(currentUser)){
+          && !event.getParentEvent(conn).get().getAssignments(conn).contains(currentUser)) {
         parentLink.setEnabled(false);
-      }else{
+      } else {
         parentLink.setEnabled(true);
       }
     } else {

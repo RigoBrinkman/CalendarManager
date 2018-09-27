@@ -1,0 +1,14 @@
+<wicket:panel>
+    <span wicket:id="user">
+        <a wicket:id="userLink" class="calendarItem">
+            <span wicket:id="name"></span>
+        </a>
+    </span>
+    <input type="button" wicket:id="addUser">
+    <form wicket:id="newUserForm">
+        <input type="text" wicket:id="mailField"/>
+        <input type="text" wicket:id="nameField"/>
+        <select type="text" wicket:id="roleSelect"/>
+        <input type="submit" wicket:id="newUserSubmit"/>
+    </form>
+</wicket:panel>

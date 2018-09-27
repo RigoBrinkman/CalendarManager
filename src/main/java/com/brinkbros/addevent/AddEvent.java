@@ -51,6 +51,7 @@ public class AddEvent extends Panel {
   private static final String DEF_LABEL_ID = "defLabel";
   private static final String MT_ASSIGNMENT_ID = "mtAssignment";
   private static final String TRACKER_ASSIGNMENT_ID = "trackerAssignment";
+  private static final String OTHER_ASSIGNMENTS_LABEL_ID = "otherAssignmentsLabel";
   private static final String ASSIGNMENT_CONTAINER_ID = "assigneesContainer";
   private static final String ASSIGNMENT_ID = "assignment";
   private static final String ASSIGNMENT_NAME_ID = "assignmentName";
@@ -309,10 +310,17 @@ public class AddEvent extends Panel {
       RepeatingView assignmentRepeater = new RepeatingView(ASSIGNMENT_ID);
       assignmentRepeater.setOutputMarkupId(true);
       outerAssignmentCont.add(assignmentRepeater);
+      
+      Label otherAssignmentsLabel = new Label(OTHER_ASSIGNMENTS_LABEL_ID, new Model("Overige assignees:"));
+      otherAssignmentsLabel.setOutputMarkupPlaceholderTag(true);
+      form.add(otherAssignmentsLabel);
 
       assignmentList = new ArrayList();
       {
         if (!assignments.isEmpty()) {
+          
+          otherAssignmentsLabel.setVisible(true);
+          
           for (int i = 0; i < assignments.size(); i++) {
             WebMarkupContainer assignmentCont = new WebMarkupContainer(assignmentRepeater.newChildId());
             assignmentCont.setOutputMarkupId(true);
@@ -337,6 +345,11 @@ public class AddEvent extends Panel {
               public void onClick(AjaxRequestTarget target) {
                 assignmentList.remove(assignment);
                 assignmentRepeater.remove(assignmentCont);
+                
+                if(assignmentList.isEmpty()){
+                  otherAssignmentsLabel.setVisible(false);
+                  target.add(otherAssignmentsLabel);
+                }
 
                 target.add(outerAssignmentCont);
               }
@@ -351,11 +364,16 @@ public class AddEvent extends Panel {
             assignmentCont.add(removeAssignment);
 
           }
+        }else{
+          otherAssignmentsLabel.setVisible(false);
         }
       }
       AjaxLink addAssignment = new AjaxLink(ADD_ASSIGNMENT_ID) {
         @Override
         public void onClick(AjaxRequestTarget target) {
+          otherAssignmentsLabel.setVisible(true);
+          target.add(otherAssignmentsLabel);
+          
           WebMarkupContainer singleAssignment = new WebMarkupContainer(assignmentRepeater.newChildId());
           singleAssignment.setOutputMarkupId(true);
           assignmentRepeater.add(singleAssignment);
@@ -377,6 +395,11 @@ public class AddEvent extends Panel {
               assignmentList.remove(assignment);
               assignmentRepeater.remove(singleAssignment);
 
+              if(assignmentList.isEmpty()){
+                otherAssignmentsLabel.setVisible(false);
+                target.add(otherAssignmentsLabel);
+              }
+              
               target.add(outerAssignmentCont);
             }
 

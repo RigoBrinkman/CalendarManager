@@ -6,6 +6,7 @@ import com.brinkbros.overview.Overview;
 import com.brinkbros.addevent.AddEvent;
 import com.brinkbros.deadlinesview.DeadlinesView;
 import com.brinkbros.login.LoginPanel;
+import com.brinkbros.userview.UserView;
 import com.brinkbros.yearview.YearView;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -79,7 +80,7 @@ public class BasePage extends WebPage {
     container = new WebMarkupContainer(BUTTON_CONTAINER_ID);
     container.setOutputMarkupPlaceholderTag(true);
     add(container);
-    
+
     userInfo = new WebMarkupContainer(USER_INFO_ID);
     userInfo.add(new Label(DATE_ID));
     userInfo.add(new Label(ROLE_ID));
@@ -171,13 +172,12 @@ public class BasePage extends WebPage {
         .collect(Collectors.toCollection(ArrayList<PageType>::new)));
     options.setVisible(true);
 
-    
     WebMarkupContainer userInfo = new WebMarkupContainer(USER_INFO_ID);
     userInfo.setOutputMarkupId(true);
     container.replace(userInfo);
-    
+
     Calendar today = Calendar.getInstance();
-    
+
     Label dateLabel = new Label(DATE_ID, new Model(
         today.get(Calendar.DAY_OF_MONTH)
         + "/"
@@ -186,9 +186,9 @@ public class BasePage extends WebPage {
         + today.get(Calendar.YEAR)));
     dateLabel.setOutputMarkupId(true);
     userInfo.add(dateLabel);
-    
+
     Label roleLabel;
-    switch(currentUser.getRole()){
+    switch (currentUser.getRole()) {
       case 0:
         roleLabel = new Label(ROLE_ID, new Model("Gebruiker"));
         break;
@@ -203,7 +203,7 @@ public class BasePage extends WebPage {
     }
     roleLabel.setOutputMarkupId(true);
     userInfo.add(roleLabel);
-    
+
     Label nameLabel = new Label(NAME_ID, new Model(currentUser.getName()));
     nameLabel.setOutputMarkupId(true);
     userInfo.add(nameLabel);
@@ -307,18 +307,27 @@ public class BasePage extends WebPage {
           }
 
         },
+    USERS("Gebruikers", "userButton", true) {
+          @Override
+          protected Panel createPanel(String panelId, Properties dbProps, SidePanel sidePanel, BasePage basePage, CalmanUser currentUser) {
+            return new UserView(panelId, dbProps, basePage);
+          }
+          @Override
+          protected boolean isButtonVisible(int role) {
+            return role == 2;
+          }
+        },
     LOGOUT("Uitloggen", "logoutButton", true) {
-      @Override
-      protected Panel createPanel(String panelId, Properties dbProps, SidePanel sidePanel, BasePage basePage, CalmanUser currentUser) {
-        basePage.setResponsePage(BasePage.class);
-        basePage.getSession().invalidate();
-        return null;
-      }
-      @Override
-      protected boolean isButtonVisible(int role) {
-        return true;
-      }
-    };
+          @Override
+          protected Panel createPanel(String panelId, Properties dbProps, SidePanel sidePanel, BasePage basePage, CalmanUser currentUser) {
+            basePage.getSession().invalidateNow();
+            return null;
+          }
+          @Override
+          protected boolean isButtonVisible(int role) {
+            return true;
+          }
+        };
     private final String id;
     private final String name;
     private final boolean isSidePanelVisible;
